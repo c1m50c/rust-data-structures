@@ -158,6 +158,24 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 }
 
 
+impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
+    fn from(vec: std::vec::Vec<T>) -> Self {
+        let mut list: LinkedList<T> = LinkedList::new();
+        for i in 0 .. vec.len() { list.push(vec[i]); }
+        return list;
+    }
+}
+
+
+impl<T: Copy> From<&[T]> for LinkedList<T> {
+    fn from(arr: &[T]) -> Self {
+        let mut list: LinkedList<T> = LinkedList::new();
+        for i in 0 .. arr.len() { list.push(arr[i]);}
+        return list;
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::LinkedList;
@@ -198,5 +216,24 @@ mod tests {
     #[test]
     fn length() {
         assert_eq!(list![1, 2, 3].len(), 3);
+    }
+
+    #[test]
+    fn display() {
+        assert_eq!(format!("{}", list![1, 3, 3, 7]), "[1, 3, 3, 7]");
+        assert_eq!(format!("{}", LinkedList::<i32>::new()), "[]");
+    }
+
+    #[test]
+    fn from_vec() {
+        let list = LinkedList::from(vec![1, 2, 3]);
+        assert_eq!(list, list![1, 2, 3]);
+    }
+
+    #[test]
+    fn from_slice() {
+        let slice: &[i32] = &[1, 2, 3];
+        let list = LinkedList::from(slice);
+        assert_eq!(list, list![1, 2, 3]);
     }
 }
