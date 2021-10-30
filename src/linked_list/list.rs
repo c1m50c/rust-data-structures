@@ -59,14 +59,18 @@ impl<T> LinkedList<T> {
         return self.length;
     }
 
+    pub fn clear(&mut self) {
+        self.head = None;
+        self.tail = None;
+        self.length = 0;
+    }
+
     pub fn push(&mut self, data: T) {
         let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
         new_node.previous = self.tail;
         new_node.next = None;
 
-        let node_ptr: Option<NonNull<Node<T>>> = Some(
-            unsafe { NonNull::new_unchecked(Box::into_raw(new_node)) }
-        );
+        let node_ptr: Option<NonNull<Node<T>>> = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
 
         match self.tail {
             Some(tail_ptr) => unsafe { (*tail_ptr.as_ptr()).next = node_ptr },
@@ -75,6 +79,15 @@ impl<T> LinkedList<T> {
 
         self.length += 1;
         self.tail = node_ptr;
+    }
+
+    pub fn remove_back(&mut self) {
+        if self.tail != None {
+            unsafe {
+                self.tail = (*self.tail.unwrap().as_ptr()).previous;
+                self.length -= 1;
+            }
+        }
     }
 
     pub fn get(&self, index: usize) -> Option<&T> {
@@ -191,6 +204,34 @@ mod tests {
         list.push("4");
         list.push("5");
         assert_eq!(list, list!["1", "2", "3", "4", "5"]);
+    }
+
+    #[test]
+    fn remove_integer() {
+        let mut list: LinkedList<i32> = list![1, 2, 3];
+        list.remove_back();
+        assert_eq!(list, list![1, 2]);
+    }
+
+    #[test]
+    fn remove_float() {
+        let mut list: LinkedList<f32> = list![1.0, 2.0, 3.0];
+        list.remove_back();
+        assert_eq!(list, list![1.0, 2.0]);
+    }
+
+    #[test]
+    fn remove_str() {
+        let mut list: LinkedList<&str> = list!["One", "Two", "Three"];
+        list.remove_back();
+        assert_eq!(list, list!["One", "Two"]);
+    }
+
+    #[test]
+    fn clear() {
+        let mut list: LinkedList<i32> = list![6, 6, 6];
+        list.clear();
+        assert_eq!(list, LinkedList::<i32>::new());
     }
 
     #[test]
