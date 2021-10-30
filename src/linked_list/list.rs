@@ -194,6 +194,12 @@ mod tests {
     }
 
     #[test]
+    fn default() {
+        let list: LinkedList<u8> = LinkedList::default();
+        assert_eq!(list, LinkedList::new());
+    }
+
+    #[test]
     fn length() {
         assert_eq!(list![1, 2, 3].len(), 3);
     }

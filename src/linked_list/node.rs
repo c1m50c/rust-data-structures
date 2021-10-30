@@ -49,3 +49,46 @@ impl<T: PartialEq> PartialEq for Node<T> {
         return self.data == other.data;
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::Node;
+
+    #[test]
+    fn create_integer_node() {
+        let node = Node::new(0);
+        assert_eq!(node, Node::new(0));
+    }
+
+    #[test]
+    fn create_float_node() {
+        let node = Node::new(0.0);
+        assert_eq!(node, Node::new(0.0));
+    }
+
+    #[test]
+    fn create_str_node() {
+        let node = Node::new("Zero");
+        assert_eq!(node, Node::new("Zero"));
+    }
+
+    #[test]
+    fn default() {
+        let node: Node<u8> = Node::default();
+        assert_eq!(node.data, 0);
+    }
+
+    #[test]
+    fn display() {
+        let node = Node::new(1337);
+        assert_eq!(format!("{}", node), "1337");
+    }
+
+    #[test]
+    fn partial_eq() {
+        let node = Node::new(500);
+        assert_eq!(node, Node::new(500));
+        assert_ne!(node, Node::new(0));
+    }
+}
