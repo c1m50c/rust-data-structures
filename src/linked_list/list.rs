@@ -38,6 +38,7 @@ macro_rules! list {
 /// pub tail: Option<NonNull<Node<T>>> // Node at the end of the List.
 /// length: usize // Amount of Nodes within the List.
 /// ```
+#[derive(Debug)]
 pub struct LinkedList<T> {
     pub head: Option<NonNull<Node<T>>>,
     pub tail: Option<NonNull<Node<T>>>,
@@ -95,27 +96,6 @@ impl<T> LinkedList<T> {
 impl<T> Default for LinkedList<T> {
     fn default() -> Self {
         return Self::new();
-    }
-}
-
-
-impl<T: fmt::Debug> fmt::Debug for LinkedList<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.length == 0 { return write!(f, "[]"); }
-
-        let mut ret: String = String::from("[");
-        let mut next_node: Option<NonNull<Node<T>>> = self.head;
-
-        while next_node != None {
-            unsafe {
-                let node_ref: &Node<T> = next_node.unwrap().as_ref();
-                ret.push_str(format!("{:?}, ", node_ref).as_str());
-                next_node = node_ref.next;
-            }
-        }
-
-        ret = ret.strip_suffix(", ").unwrap().to_string();
-        return write!(f, "{}", ret + "]");
     }
 }
 

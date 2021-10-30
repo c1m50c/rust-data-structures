@@ -11,6 +11,7 @@ use std::fmt;
 /// pub next: Option<NonNull<Node<T>>> // Next Node within the LinkedList.
 /// pub data: T // Node's data.
 /// ```
+#[derive(Debug)]
 pub struct Node<T> {
     pub previous: Option<NonNull<Node<T>>>,
     pub next: Option<NonNull<Node<T>>>,
@@ -32,13 +33,6 @@ impl<T> Node<T> {
 impl<T: Default> Default for Node<T> {
     fn default() -> Self {
         return Self::new(T::default());
-    }
-}
-
-
-impl<T: fmt::Debug> fmt::Debug for Node<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        return write!(f, "{:?}", self.data);
     }
 }
 
