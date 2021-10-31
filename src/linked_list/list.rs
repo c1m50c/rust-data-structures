@@ -55,6 +55,12 @@ impl<T> LinkedList<T> {
         }
     }
 
+    /// Returns the `length` of the `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<&str> = list!["This", "is", "a", "Linked", "List"];
+    /// assert_eq!(list.len(), 5);
+    /// ```
     pub fn len(&self) -> usize {
         return self.length;
     }
@@ -125,8 +131,10 @@ impl<T> LinkedList<T> {
         return self.get_node(self.head, index);
     }
 
-    fn get_node(&self, node: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
-        match node {
+    /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index,
+    /// and the passed `root` contains the `Node` at a given `next` reference.
+    fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
+        match root {
             Some(next_ptr) => match index {
                 0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
                 _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
