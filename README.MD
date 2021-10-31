@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/c1m50c/rust-data-structures/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/c1m50c/rust-data-structures/actions/workflows/build.yml)
 
-Library containing various Data Structures implemented using Rust.
+Library implementing various Data Structures in Rust, made strictly for learning purposes.
 
 ## **Running**
 You can test the library by running `cargo test`, an example using it is shown below.
