@@ -1,6 +1,32 @@
+use std::slice::from_raw_parts_mut as slice_from_raw_parts_mut;
+use std::ptr::{NonNull, drop_in_place};
 use std::mem::{size_of, align_of};
-use std::ptr::NonNull;
+use std::option::Option;
 use std::alloc;
+
+
+/// Shorthand Syntax for creating a new `Vector`.
+/// ## Example:
+/// ```rust
+/// let mut vector: Vector<u8> = Vector::new();
+/// vector.push(1);
+/// vector.push(2);
+/// vector.push(3);
+/// assert_eq!(vector, vector![1, 2, 3]);
+/// ```
+#[macro_export]
+macro_rules! vector {
+    ($($e:expr), *) => {
+        {
+            #[allow(unused_mut)]
+            let mut vec = $crate::vector::vec::Vector::new();
+            $(
+                vec.push($e);
+            )*
+            vec
+        }
+    };
+}
 
 
 #[derive(Debug)]
@@ -77,12 +103,50 @@ impl<T> Vector<T> {
             }
         }
     }
+
+    pub fn get(&self, idx: usize) -> Option<&T> {
+        if idx < self.length {
+            unsafe { return Some(&*self.ptr.as_ptr().add(idx)); }
+        }
+        
+        return None;
+    }
+}
+
+
+impl<T: PartialEq> Vector<T> {
+    pub fn search(&self, finding: T) -> Option<usize> {
+        for i in 0 .. self.length {
+            if self.get(i).unwrap() == &finding {
+                return Some(i);
+            }
+        }
+        return None;
+    }
 }
 
 
 impl<T> Default for Vector<T> {
     fn default() -> Self {
         return Self::new();
+    }
+}
+
+
+impl<T> Drop for Vector<T> {
+    fn drop(&mut self) {
+        unsafe {
+            drop_in_place(
+        slice_from_raw_parts_mut(self.ptr.as_ptr(), self.length)
+            );
+
+            let layout = alloc::Layout::from_size_align_unchecked(
+                size_of::<T>() * self.capacity,
+                align_of::<T>(),
+            );
+
+            alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout)
+        }
     }
 }
 
@@ -125,5 +189,41 @@ mod tests {
         vec.push("Five");
         assert_eq!(vec.capacity(), 8);
         assert_eq!(vec.len(), 5);
+    }
+
+    #[test]
+    fn get_integer() {
+        let vec: Vector<i32> = vector![1, 2, 3, 4, 5];
+        assert_eq!(vec.get(2), Some(&3));
+    }
+
+    #[test]
+    fn get_float() {
+        let vec: Vector<f32> = vector![1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(vec.get(2), Some(&3.0));
+    }
+
+    #[test]
+    fn get_str() {
+        let vec: Vector<&str> = vector!["Hey", "You", "should", "get", "ME!"];
+        assert_eq!(vec.get(4), Some(&"ME!"));
+    }
+
+    #[test]
+    fn search_for_integer() {
+        let vec: Vector<i32> = vector![1337, 420, 3005, 666, 23];
+        assert_eq!(vec.search(666), Some(3));
+    }
+
+    #[test]
+    fn search_for_float() {
+        let vec: Vector<f32> = vector![3.14, 3.60, 5.55, 7.20, 45.0];
+        assert_eq!(vec.search(5.55), Some(2));
+    }
+
+    #[test]
+    fn search_for_str() {
+        let vec: Vector<&str> = vector!["Hey", "You", "maybe", "find", "this."];
+        assert_eq!(vec.search("this."), Some(4));
     }
 }
