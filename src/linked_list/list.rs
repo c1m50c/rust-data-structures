@@ -106,6 +106,23 @@ impl<T> LinkedList<T> {
 }
 
 
+impl<T: PartialEq> LinkedList<T> {
+    pub fn search(&self, finding: T) -> Option<usize> {
+        let mut next_node = self.head;
+
+        for i in 0 .. self.length {
+            unsafe {
+                let node_ref = next_node.unwrap().as_ref();
+                if node_ref.data == finding { return Some(i); }
+                next_node = next_node.unwrap().as_ref().next;
+            }
+        }
+
+        return None;
+    }
+}
+
+
 impl<T> Default for LinkedList<T> {
     fn default() -> Self {
         return Self::new();
@@ -232,6 +249,42 @@ mod tests {
         let mut list: LinkedList<i32> = list![6, 6, 6];
         list.clear();
         assert_eq!(list, LinkedList::<i32>::new());
+    }
+
+    #[test]
+    fn get_integer() {
+        let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+        assert_eq!(list.get(2), Some(&3));
+    }
+
+    #[test]
+    fn get_float() {
+        let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(list.get(2), Some(&3.0));
+    }
+    
+    #[test]
+    fn get_str() {
+        let list: LinkedList<&str> = list!["Get", "This", "Ok?"];
+        assert_eq!(list.get(1), Some(&"This"));
+    }
+
+    #[test]
+    fn search_for_integer() {
+        let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+        assert_eq!(list.search(3), Some(2));
+    }
+
+    #[test]
+    fn search_for_float() {
+        let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(list.search(3.0), Some(2));
+    }
+
+    #[test]
+    fn search_for_str() {
+        let list: LinkedList<&str> = list!["Search", "Idk", "Maybe", "This?"];
+        assert_eq!(list.search("This?"), Some(3));
     }
 
     #[test]
