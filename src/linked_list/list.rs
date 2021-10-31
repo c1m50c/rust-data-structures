@@ -59,12 +59,29 @@ impl<T> LinkedList<T> {
         return self.length;
     }
 
+    /// Clears the `LinkedList`, making it completely empty and resetting its `length`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<&str> = list!["Hey", "how", "it", "b"];
+    /// assert_eq!(list, list!["Hey", "how", "it", "b"]);
+    /// list.clear()
+    /// assert_eq!(list, LinkedList::<&str>::new());
+    /// ```
     pub fn clear(&mut self) {
         self.head = None;
         self.tail = None;
         self.length = 0;
     }
 
+    /// Pushes or appends a new `Node` to the end of the `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<i32> = LinkedList::new();
+    /// list.push(1);
+    /// list.push(2);
+    /// list.push(3);
+    /// assert_eq!(list, list![1, 2, 3]);
+    /// ```
     pub fn push(&mut self, data: T) {
         let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
         new_node.previous = self.tail;
@@ -81,6 +98,14 @@ impl<T> LinkedList<T> {
         self.tail = node_ptr;
     }
 
+    /// Removes the last `Node` within the `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<&str> = list!["Please", "don't", "remove", "ME!"];
+    /// assert_eq!(list, list!["Please", "don't", "remove", "ME!"]);
+    /// list.remove_back();
+    /// assert_eq!(list, list!["Please", "don't", "remove"]);
+    /// ```
     pub fn remove_back(&mut self) {
         if self.tail != None {
             unsafe {
@@ -90,6 +115,12 @@ impl<T> LinkedList<T> {
         }
     }
 
+    /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<&str> = list!["Get", "This"];
+    /// assert_eq!(list.get(1), Some(&"This"));
+    /// ```
     pub fn get(&self, index: usize) -> Option<&T> {
         return self.get_node(self.head, index);
     }
@@ -107,6 +138,13 @@ impl<T> LinkedList<T> {
 
 
 impl<T: PartialEq> LinkedList<T> {
+    /// Searches through the `LinkedList` for a `Node` that contains the equivalent value of `finding`,
+    /// returning its index if found.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<&str> = list!["Hey", "find", "THIS!"];
+    /// assert_eq!(list.search("THIS!"), Some(2));
+    /// ```
     pub fn search(&self, finding: T) -> Option<usize> {
         let mut next_node = self.head;
 
