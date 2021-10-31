@@ -29,6 +29,13 @@ macro_rules! vector {
 }
 
 
+/// Mimic implementation of `std::vec::Vec`.
+/// ## Fields:
+/// ```rust
+/// ptr: NonNull<T> // Pointer to the Vector in memory.
+/// capacity: usize // Capacity of the Vector.
+/// length: usize // Length of the Vector.
+/// ```
 #[derive(Debug)]
 pub struct Vector<T> {
     ptr: NonNull<T>,
@@ -54,6 +61,15 @@ impl<T> Vector<T> {
         return self.length;
     }
 
+    /// Pushs a new value into the `Vector`
+    /// ## Example:
+    /// ```rust
+    /// let mut vector: Vector<i32> = Vector::new();
+    /// vector.push(4);
+    /// vector.push(0);
+    /// vector.push(4);
+    /// assert_eq!(vector, vector![4, 0, 4]);
+    /// ```
     pub fn push(&mut self, value: T) {
         assert_ne!(size_of::<T>(), 0, "Zero-sized Types are not allowed.");
         
@@ -104,6 +120,7 @@ impl<T> Vector<T> {
         }
     }
 
+    /// Returns a reference to the value at the given index if it exists.
     pub fn get(&self, idx: usize) -> Option<&T> {
         if idx < self.length {
             unsafe { return Some(&*self.ptr.as_ptr().add(idx)); }
@@ -115,6 +132,7 @@ impl<T> Vector<T> {
 
 
 impl<T: PartialEq> Vector<T> {
+    /// Searches through the `Vector` to find a value that matches `finding`, returning its index if found.
     pub fn search(&self, finding: T) -> Option<usize> {
         for i in 0 .. self.length {
             if self.get(i).unwrap() == &finding {
@@ -147,6 +165,23 @@ impl<T> Drop for Vector<T> {
 
             alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout)
         }
+    }
+}
+
+
+impl<T: PartialEq> PartialEq for Vector<T> {
+    fn eq(&self, other: &Self) -> bool {
+        if self.length != other.len() { return false; }
+
+        for i in 0 .. self.length {
+            let (sget, oget) = (self.get(i), other.get(i));
+            if sget.is_some() != sget.is_some() { return false; }
+            if sget.is_some() {
+                if sget.unwrap() != oget.unwrap() { return false; }
+            }
+        }
+
+        return true;
     }
 }
 
@@ -225,5 +260,13 @@ mod tests {
     fn search_for_str() {
         let vec: Vector<&str> = vector!["Hey", "You", "maybe", "find", "this."];
         assert_eq!(vec.search("this."), Some(4));
+    }
+
+    #[test]
+    fn partial_eq() {
+        let vec_one: Vector<i32> = vector![5, 0, 5, 7, 8, 8];
+        let vec_two: Vector<i32> = vector![5, 0, 5, 7, 8, 8];
+        assert_eq!(vec_one, vec_two);
+        assert_ne!(vec_one, vector![0, 3, 0, 0, 0, 0]);
     }
 }
