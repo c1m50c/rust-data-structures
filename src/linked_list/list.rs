@@ -11,9 +11,9 @@ use std::fmt;
 /// ## Example:
 /// ```rust
 /// let mut list: LinkedList<u8> = LinkedList::new();
-/// list.push(1);
-/// list.push(2);
-/// list.push(3);
+/// list.push_back(1);
+/// list.push_back(2);
+/// list.push_back(3);
 /// assert_eq!(list, list![1, 2, 3]);
 /// ```
 #[macro_export]
@@ -23,7 +23,7 @@ macro_rules! list {
             #[allow(unused_mut)]
             let mut list = $crate::linked_list::list::LinkedList::new();
             $(
-                list.push($e);
+                list.push_back($e);
             )*
             list
         }
@@ -46,8 +46,25 @@ pub struct LinkedList<T> {
 }
 
 
+/* Private Methods */
 impl<T> LinkedList<T> {
-    pub fn new() -> Self {
+    /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index,
+    /// and the passed `root` contains the `Node` at a given `next` reference.
+    fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
+        match root {
+            Some(next_ptr) => match index {
+                0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
+                _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
+            },
+            None => None,
+        }
+    }
+}
+
+
+/* Public Methods */
+impl<T> LinkedList<T> {
+    pub const fn new() -> Self {
         return Self {
             head: None,
             tail: None,
@@ -74,21 +91,56 @@ impl<T> LinkedList<T> {
     /// assert_eq!(list, LinkedList::<&str>::new());
     /// ```
     pub fn clear(&mut self) {
-        self.head = None;
-        self.tail = None;
-        self.length = 0;
+        *self = Self::new();
+    }
+
+    /// Returns a `bool` that determines if the list is empty.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<i32> = list![1, 2, 3];
+    /// assert_eq!(list.is_empty(), false);
+    /// list.clear();
+    /// assert_eq!(list.is_empty(), true);
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        return self.head.is_none();
+    }
+
+    /// Pushes or prepends a new `Node` to the start of the `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<i32> = LinkedList::new();
+    /// list.push_front(1);
+    /// list.push_front(2);
+    /// list.push_front(3);
+    /// assert_eq!(list, list![3, 2, 1]);
+    /// ```
+    pub fn push_front(&mut self, data: T) {
+        let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
+        new_node.next = self.head;
+        new_node.previous = None;
+
+        let node_ptr = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
+
+        match self.head {
+            Some(head_ptr) => unsafe { (*head_ptr.as_ptr()).previous = node_ptr },
+            None => self.tail = node_ptr,
+        }
+
+        self.head = node_ptr;
+        self.length += 1;
     }
 
     /// Pushes or appends a new `Node` to the end of the `LinkedList`.
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = LinkedList::new();
-    /// list.push(1);
-    /// list.push(2);
-    /// list.push(3);
+    /// list.push_back(1);
+    /// list.push_back(2);
+    /// list.push_back(3);
     /// assert_eq!(list, list![1, 2, 3]);
     /// ```
-    pub fn push(&mut self, data: T) {
+    pub fn push_back(&mut self, data: T) {
         let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
         new_node.previous = self.tail;
         new_node.next = None;
@@ -131,15 +183,39 @@ impl<T> LinkedList<T> {
         return self.get_node(self.head, index);
     }
 
-    /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index,
-    /// and the passed `root` contains the `Node` at a given `next` reference.
-    fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
-        match root {
-            Some(next_ptr) => match index {
-                0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
-                _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
-            },
-            None => None,
+    /// Returns a reference to the `Node` at the front of the list.
+    pub fn front(&self) -> Option<&T> {
+        if self.head.is_none() { return None; }
+        
+        unsafe {
+            return Some(&self.head.unwrap().as_ref().data);
+        }
+    }
+
+    /// Returns a mutable reference to the `Node` at the front of the list.
+    pub fn front_mut(&self) -> Option<&mut T> {
+        if self.head.is_none() { return None; }
+        
+        unsafe {
+            return Some(&mut self.head.unwrap().as_mut().data);
+        }
+    }
+
+    /// Returns a reference to the `Node` at the back of the list.
+    pub fn back(&self) -> Option<&T> {
+        if self.tail.is_none() { return None; }
+        
+        unsafe {
+            return Some(&self.tail.unwrap().as_ref().data);
+        }
+    }
+
+    /// Returns a mutable reference to the `Node` at the back of the list.
+    pub fn back_mut(&self) -> Option<&mut T> {
+        if self.tail.is_none() { return None; }
+        
+        unsafe {
+            return Some(&mut self.tail.unwrap().as_mut().data);
         }
     }
 }
@@ -217,7 +293,7 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
     fn from(vec: std::vec::Vec<T>) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
-        for i in 0 .. vec.len() { list.push(vec[i]); }
+        for i in 0 .. vec.len() { list.push_back(vec[i]); }
         return list;
     }
 }
@@ -226,7 +302,7 @@ impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
 impl<T: Copy> From<&[T]> for LinkedList<T> {
     fn from(arr: &[T]) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
-        for i in 0 .. arr.len() { list.push(arr[i]);}
+        for i in 0 .. arr.len() { list.push_back(arr[i]);}
         return list;
     }
 }
@@ -237,54 +313,93 @@ mod tests {
     use super::LinkedList;
 
     #[test]
-    fn create_integer_list() {
+    fn push_front_integer() {
         let mut list: LinkedList<i32> = LinkedList::new();
-        list.push(1);
-        list.push(2);
-        list.push(3);
-        list.push(4);
-        list.push(5);
+        list.push_front(1);
+        list.push_front(2);
+        list.push_front(3);
+        list.push_front(4);
+        list.push_front(5);
+        assert_eq!(list, list![5, 4, 3, 2, 1]);
+        assert_eq!(list.len(), 5);
+    }
+
+    #[test]
+    fn push_back_integer() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+        list.push_back(1);
+        list.push_back(2);
+        list.push_back(3);
+        list.push_back(4);
+        list.push_back(5);
         assert_eq!(list, list![1, 2, 3, 4, 5]);
+        assert_eq!(list.len(), 5);
     }
 
     #[test]
-    fn create_float_list() {
+    fn push_front_float() {
         let mut list: LinkedList<f32> = LinkedList::new();
-        list.push(1.0);
-        list.push(2.0);
-        list.push(3.0);
-        list.push(4.0);
-        list.push(5.0);
+        list.push_front(1.0);
+        list.push_front(2.0);
+        list.push_front(3.0);
+        list.push_front(4.0);
+        list.push_front(5.0);
+        assert_eq!(list, list![5.0, 4.0, 3.0, 2.0, 1.0]);
+        assert_eq!(list.len(), 5);
+    }
+
+    #[test]
+    fn pust_back_float() {
+        let mut list: LinkedList<f32> = LinkedList::new();
+        list.push_back(1.0);
+        list.push_back(2.0);
+        list.push_back(3.0);
+        list.push_back(4.0);
+        list.push_back(5.0);
         assert_eq!(list, list![1.0, 2.0, 3.0, 4.0, 5.0]);
+        assert_eq!(list.len(), 5);
     }
 
     #[test]
-    fn create_str_list() {
+    fn push_front_str() {
         let mut list: LinkedList<&str> = LinkedList::new();
-        list.push("1");
-        list.push("2");
-        list.push("3");
-        list.push("4");
-        list.push("5");
-        assert_eq!(list, list!["1", "2", "3", "4", "5"]);
+        list.push_front("1");
+        list.push_front("2");
+        list.push_front("3");
+        list.push_front("4");
+        list.push_front("5");
+        assert_eq!(list, list!["5", "4", "3", "2", "1"]);
+        assert_eq!(list.len(), 5);
     }
 
     #[test]
-    fn remove_integer() {
+    fn push_back_str() {
+        let mut list: LinkedList<&str> = LinkedList::new();
+        list.push_back("1");
+        list.push_back("2");
+        list.push_back("3");
+        list.push_back("4");
+        list.push_back("5");
+        assert_eq!(list, list!["1", "2", "3", "4", "5"]);
+        assert_eq!(list.len(), 5);
+    }
+
+    #[test]
+    fn remove_back_integer() {
         let mut list: LinkedList<i32> = list![1, 2, 3];
         list.remove_back();
         assert_eq!(list, list![1, 2]);
     }
 
     #[test]
-    fn remove_float() {
+    fn remove_back_float() {
         let mut list: LinkedList<f32> = list![1.0, 2.0, 3.0];
         list.remove_back();
         assert_eq!(list, list![1.0, 2.0]);
     }
 
     #[test]
-    fn remove_str() {
+    fn remove_back_str() {
         let mut list: LinkedList<&str> = list!["One", "Two", "Three"];
         list.remove_back();
         assert_eq!(list, list!["One", "Two"]);
@@ -295,6 +410,14 @@ mod tests {
         let mut list: LinkedList<i32> = list![6, 6, 6];
         list.clear();
         assert_eq!(list, LinkedList::<i32>::new());
+    }
+
+    #[test]
+    fn is_empty() {
+        let mut list: LinkedList<&str> = list!["I", "am", "not", "empty."];
+        assert_eq!(list.is_empty(), false);
+        list.clear();
+        assert_eq!(list.is_empty(), true);
     }
 
     #[test]
