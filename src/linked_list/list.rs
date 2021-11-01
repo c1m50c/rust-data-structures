@@ -50,6 +50,7 @@ pub struct LinkedList<T> {
 impl<T> LinkedList<T> {
     /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index,
     /// and the passed `root` contains the `Node` at a given `next` reference.
+    #[inline]
     fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
         match root {
             Some(next_ptr) => match index {
@@ -64,6 +65,7 @@ impl<T> LinkedList<T> {
 
 /* Public Methods */
 impl<T> LinkedList<T> {
+    #[inline]
     pub const fn new() -> Self {
         return Self {
             head: None,
@@ -78,6 +80,7 @@ impl<T> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["This", "is", "a", "Linked", "List"];
     /// assert_eq!(list.len(), 5);
     /// ```
+    #[inline]
     pub fn len(&self) -> usize {
         return self.length;
     }
@@ -90,6 +93,7 @@ impl<T> LinkedList<T> {
     /// list.clear()
     /// assert_eq!(list, LinkedList::<&str>::new());
     /// ```
+    #[inline]
     pub fn clear(&mut self) {
         *self = Self::new();
     }
@@ -102,6 +106,7 @@ impl<T> LinkedList<T> {
     /// list.clear();
     /// assert_eq!(list.is_empty(), true);
     /// ```
+    #[inline]
     pub fn is_empty(&self) -> bool {
         return self.head.is_none();
     }
@@ -115,6 +120,7 @@ impl<T> LinkedList<T> {
     /// list.push_front(3);
     /// assert_eq!(list, list![3, 2, 1]);
     /// ```
+    #[inline]
     pub fn push_front(&mut self, data: T) {
         let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
         new_node.next = self.head;
@@ -140,6 +146,7 @@ impl<T> LinkedList<T> {
     /// list.push_back(3);
     /// assert_eq!(list, list![1, 2, 3]);
     /// ```
+    #[inline]
     pub fn push_back(&mut self, data: T) {
         let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
         new_node.previous = self.tail;
@@ -164,6 +171,7 @@ impl<T> LinkedList<T> {
     /// list.remove_back();
     /// assert_eq!(list, list!["Please", "don't", "remove"]);
     /// ```
+    #[inline]
     pub fn remove_back(&mut self) {
         if self.tail != None {
             unsafe {
@@ -181,6 +189,7 @@ impl<T> LinkedList<T> {
     /// list_one.append_list(&mut list_two);
     /// assert_eq!(list_one, list![1, 2, 3, 4, 5, 6]);
     /// ```
+    #[inline]
     pub fn append_list(&mut self, other: &mut Self) {
         match self.tail {
             None => std::mem::swap(self, other),
@@ -204,11 +213,13 @@ impl<T> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["Get", "This"];
     /// assert_eq!(list.get(1), Some(&"This"));
     /// ```
+    #[inline]
     pub fn get(&self, index: usize) -> Option<&T> {
         return self.get_node(self.head, index);
     }
 
     /// Returns a reference to the `Node` at the front of the list.
+    #[inline]
     pub fn front(&self) -> Option<&T> {
         if self.head.is_none() { return None; }
         
@@ -218,6 +229,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a mutable reference to the `Node` at the front of the list.
+    #[inline]
     pub fn front_mut(&self) -> Option<&mut T> {
         if self.head.is_none() { return None; }
         
@@ -227,6 +239,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a reference to the `Node` at the back of the list.
+    #[inline]
     pub fn back(&self) -> Option<&T> {
         if self.tail.is_none() { return None; }
         
@@ -236,6 +249,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a mutable reference to the `Node` at the back of the list.
+    #[inline]
     pub fn back_mut(&self) -> Option<&mut T> {
         if self.tail.is_none() { return None; }
         
@@ -254,6 +268,7 @@ impl<T: PartialEq> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["Hey", "find", "THIS!"];
     /// assert_eq!(list.search("THIS!"), Some(2));
     /// ```
+    #[inline]
     pub fn search(&self, finding: T) -> Option<usize> {
         let mut next_node = self.head;
 
