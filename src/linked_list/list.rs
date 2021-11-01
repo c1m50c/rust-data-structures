@@ -287,7 +287,24 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 
         return true;
     }
+
+    fn ne(&self, other: &Self) -> bool {
+        if self.len() != other.len() { return true; }
+
+        for i in 0 .. self.len() {
+            let (sget, oget) = (self.get(i), other.get(i));
+            if sget.is_some() != oget.is_some() { return true; }
+            if sget.is_some() {
+                if sget.unwrap() != oget.unwrap() { return true; }
+            }
+        }
+
+        return false;
+    }
 }
+
+
+impl<T: Eq> Eq for LinkedList<T> {  }
 
 
 impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
@@ -300,9 +317,17 @@ impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
 
 
 impl<T: Copy> From<&[T]> for LinkedList<T> {
-    fn from(arr: &[T]) -> Self {
+    fn from(slice: &[T]) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
-        for i in 0 .. arr.len() { list.push_back(arr[i]);}
+        for i in 0 .. slice.len() { list.push_back(slice[i]); }
+        return list;
+    }
+}
+
+impl<T: Copy, const N: usize> From<[T; N]> for LinkedList<T> {
+    fn from(arr: [T; N]) -> Self {
+        let mut list: LinkedList<T> = LinkedList::new();
+        for i in 0 .. N { list.push_back(arr[i]); }
         return list;
     }
 }
@@ -483,6 +508,13 @@ mod tests {
     fn from_slice() {
         let slice: &[i32] = &[1, 2, 3];
         let list = LinkedList::from(slice);
+        assert_eq!(list, list![1, 2, 3]);
+    }
+
+    #[test]
+    fn from_array() {
+        let arr: [i32; 3] = [1, 2, 3];
+        let list = LinkedList::from(arr);
         assert_eq!(list, list![1, 2, 3]);
     }
 }
