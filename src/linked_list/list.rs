@@ -173,6 +173,31 @@ impl<T> LinkedList<T> {
         }
     }
 
+    /// Appends another list to the end of the list.
+    /// ## Example:
+    /// ```rust
+    /// let mut list_one: LinkedList<i32> = list![1, 2, 3];
+    /// let mut list_two: LinkedList<i32> = list![4, 5, 6];
+    /// list_one.append_list(&mut list_two);
+    /// assert_eq!(list_one, list![1, 2, 3, 4, 5, 6]);
+    /// ```
+    pub fn append_list(&mut self, other: &mut Self) {
+        match self.tail {
+            None => std::mem::swap(self, other),
+            Some(mut stail_ptr) => {
+                if let Some(mut ohead_ptr) = other.head.take() {
+                    unsafe {
+                        stail_ptr.as_mut().next = Some(ohead_ptr);
+                        ohead_ptr.as_mut().previous = Some(stail_ptr);
+                    }
+
+                    self.tail = other.tail.take();
+                    self.length += std::mem::replace(&mut other.length, 0);
+                }
+            }
+        }
+    }
+
     /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index.
     /// ## Example:
     /// ```rust
@@ -407,6 +432,15 @@ mod tests {
         list.push_back("5");
         assert_eq!(list, list!["1", "2", "3", "4", "5"]);
         assert_eq!(list.len(), 5);
+    }
+
+    #[test]
+    fn append_list() {
+        let mut list_one: LinkedList<&str> = list!["One", "Two", "Three"];
+        let mut list_two: LinkedList<&str> = list!["Four", "Five", "Six"];
+        list_one.append_list(&mut list_two);
+        assert_eq!(list_one, list!["One", "Two", "Three", "Four", "Five", "Six"]);
+        assert_eq!(list_one.len(), 6);
     }
 
     #[test]
