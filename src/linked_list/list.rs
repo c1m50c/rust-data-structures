@@ -1,5 +1,6 @@
 use super::node::Node;
 
+use std::ops::{Index, IndexMut};
 use std::option::Option;
 use std::cmp::PartialEq;
 use std::ptr::NonNull;
@@ -56,6 +57,19 @@ impl<T> LinkedList<T> {
             Some(next_ptr) => match index {
                 0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
                 _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
+            },
+            None => None,
+        }
+    }
+
+    /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index,
+    /// and the passed `root` contains the `Node` at a given `next` reference.
+    #[inline]
+    fn get_node_mut(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut T> {
+        match root {
+            Some(next_ptr) => match index {
+                0 => Some( unsafe{ &mut (*next_ptr.as_ptr()).data } ),
+                _ => self.get_node_mut( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
             },
             None => None,
         }
@@ -218,6 +232,17 @@ impl<T> LinkedList<T> {
         return self.get_node(self.head, index);
     }
 
+    /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<&str> = list!["Get", "This"];
+    /// assert_eq!(list.get_mut(1), Some(&mut "This"));
+    /// ```
+    #[inline]
+    pub fn get_mut(&self, index: usize) -> Option<&mut T> {
+        return self.get_node_mut(self.head, index);
+    }
+
     /// Returns a reference to the `Node` at the front of the list.
     #[inline]
     pub fn front(&self) -> Option<&T> {
@@ -345,6 +370,22 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 
 
 impl<T: Eq> Eq for LinkedList<T> {  }
+
+
+impl<T> Index<usize> for LinkedList<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        return self.get(index).unwrap().to_owned();
+    }
+}
+
+
+impl<T> IndexMut<usize> for LinkedList<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        return self.get_mut(index).unwrap();
+    }
+}
 
 
 impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
@@ -513,6 +554,33 @@ mod tests {
     }
 
     #[test]
+    fn get_mut_integer() {
+        let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+        let got = list.get_mut(2).unwrap();
+        assert_eq!(list.get_mut(2), Some(&mut 3));
+        *got = 6;
+        assert_eq!(list.get_mut(2), Some(&mut 6));
+    }
+
+    #[test]
+    fn get_mut_float() {
+        let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
+        let got = list.get_mut(2).unwrap();
+        assert_eq!(list.get_mut(2), Some(&mut 3.0));
+        *got = 6.0;
+        assert_eq!(list.get_mut(2), Some(&mut 6.0));
+    }
+    
+    #[test]
+    fn get_mut_str() {
+        let list: LinkedList<&str> = list!["Get", "This", "Ok?"];
+        let got = list.get_mut(1).unwrap();
+        assert_eq!(list.get_mut(1), Some(&mut "This"));
+        *got = "This! but mutable..";
+        assert_eq!(list.get_mut(1), Some(&mut "This! but mutable.."));
+    }
+
+    #[test]
     fn search_for_integer() {
         let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
         assert_eq!(list.search(3), Some(2));
@@ -528,6 +596,27 @@ mod tests {
     fn search_for_str() {
         let list: LinkedList<&str> = list!["Search", "Idk", "Maybe", "This?"];
         assert_eq!(list.search("This?"), Some(3));
+    }
+
+    #[test]
+    fn index() {
+        let list: LinkedList<&str> = list!["Hey", "this", "is", "a", "Linked", "List"];
+        assert_eq!(list[0], "Hey");
+        assert_eq!(list[1], "this");
+        assert_eq!(list[2], "is");
+        assert_eq!(list[3], "a");
+        assert_eq!(list[4], "Linked");
+        assert_eq!(list[5], "List");
+    }
+
+    #[test]
+    fn index_mut() {
+        let mut list: LinkedList<i32> = list![3, 3, 3];
+        assert_eq!(list, list![3, 3, 3]);
+        list[0] = 6;
+        list[1] = 6;
+        list[2] = 6;
+        assert_eq!(list, list![6, 6, 6]);
     }
 
     #[test]
