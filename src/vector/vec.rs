@@ -1,6 +1,7 @@
 use std::slice::from_raw_parts_mut as slice_from_raw_parts_mut;
 use std::ptr::{NonNull, drop_in_place};
 use std::mem::{size_of, align_of};
+use std::ops::{Index, IndexMut};
 use std::option::Option;
 use std::alloc;
 
@@ -128,6 +129,15 @@ impl<T> Vector<T> {
         
         return None;
     }
+
+    /// Returns a mutable reference to the value at the given index if it exists.
+    pub fn get_mut(&self, idx: usize) -> Option<&mut T> {
+        if idx < self.length {
+            unsafe { return Some(&mut *self.ptr.as_ptr().add(idx)); }
+        }
+        
+        return None;
+    }
 }
 
 
@@ -182,6 +192,22 @@ impl<T: PartialEq> PartialEq for Vector<T> {
         }
 
         return true;
+    }
+}
+
+
+impl<T> Index<usize> for Vector<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        return self.get(index).unwrap();
+    }
+}
+
+
+impl<T> IndexMut<usize> for Vector<T> {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        return self.get_mut(index).unwrap();
     }
 }
 
@@ -245,6 +271,33 @@ mod tests {
     }
 
     #[test]
+    fn get_mut_integer() {
+        let vec: Vector<i32> = vector![1, 2, 3, 4, 5];
+        let got = vec.get_mut(2).unwrap();
+        assert_eq!(vec.get_mut(2), Some(&mut 3));
+        *got = 72;
+        assert_eq!(vec.get_mut(2), Some(&mut 72));
+    }
+
+    #[test]
+    fn get_mut_float() {
+        let vec: Vector<f32> = vector![1.0, 2.0, 3.0, 4.0, 5.0];
+        let got = vec.get_mut(2).unwrap();
+        assert_eq!(vec.get_mut(2), Some(&mut 3.0));
+        *got = 72.0;
+        assert_eq!(vec.get_mut(2), Some(&mut 72.0));
+    }
+
+    #[test]
+    fn get_mut_str() {
+        let vec: Vector<&str> = vector!["Hey", "You", "should", "get", "ME!"];
+        let got = vec.get_mut(4).unwrap();
+        assert_eq!(vec.get_mut(4), Some(&mut "ME!"));
+        *got = "ME! But mutable..";
+        assert_eq!(vec.get_mut(4), Some(&mut "ME! But mutable.."));
+    }
+
+    #[test]
     fn search_for_integer() {
         let vec: Vector<i32> = vector![1337, 420, 3005, 666, 23];
         assert_eq!(vec.search(666), Some(3));
@@ -268,5 +321,25 @@ mod tests {
         let vec_two: Vector<i32> = vector![5, 0, 5, 7, 8, 8];
         assert_eq!(vec_one, vec_two);
         assert_ne!(vec_one, vector![0, 3, 0, 0, 0, 0]);
+    }
+
+    #[test]
+    fn index() {
+        let vec: Vector<&str> = vector!["Hey", "this", "is", "a", "Vector"];
+        assert_eq!(vec[0], "Hey");
+        assert_eq!(vec[1], "this");
+        assert_eq!(vec[2], "is");
+        assert_eq!(vec[3], "a");
+        assert_eq!(vec[4], "Vector");
+    }
+
+    #[test]
+    fn index_mut() {
+        let mut vec: Vector<i32> = vector![3, 3, 3];
+        assert_eq!(vec, vector![3, 3, 3]);
+        vec[0] = 6;
+        vec[1] = 6;
+        vec[2] = 6;
+        assert_eq!(vec, vector![6, 6, 6]);
     }
 }
