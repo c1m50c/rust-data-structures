@@ -46,7 +46,7 @@ pub struct Vector<T> {
 
 
 impl<T> Vector<T> {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             ptr: NonNull::dangling(),
             capacity: 0,

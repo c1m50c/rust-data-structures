@@ -35,14 +35,14 @@ macro_rules! list {
 /// Implementation of a Doubly Linked List.
 /// ## Fields:
 /// ```rust
-/// pub head: Option<NonNull<Node<T>>> // Node at the start of the List.
-/// pub tail: Option<NonNull<Node<T>>> // Node at the end of the List.
+/// head: Option<NonNull<Node<T>>> // Node at the start of the List.
+/// tail: Option<NonNull<Node<T>>> // Node at the end of the List.
 /// length: usize // Amount of Nodes within the List.
 /// ```
 #[derive(Debug)]
 pub struct LinkedList<T> {
-    pub head: Option<NonNull<Node<T>>>,
-    pub tail: Option<NonNull<Node<T>>>,
+    head: Option<NonNull<Node<T>>>,
+    tail: Option<NonNull<Node<T>>>,
     length: usize,
 }
 
@@ -79,7 +79,7 @@ impl<T> LinkedList<T> {
 
 /* Public Methods */
 impl<T> LinkedList<T> {
-    #[inline]
+    #[inline(always)]
     pub const fn new() -> Self {
         return Self {
             head: None,
@@ -94,7 +94,7 @@ impl<T> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["This", "is", "a", "Linked", "List"];
     /// assert_eq!(list.len(), 5);
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn len(&self) -> usize {
         return self.length;
     }
@@ -107,7 +107,7 @@ impl<T> LinkedList<T> {
     /// list.clear()
     /// assert_eq!(list, LinkedList::<&str>::new());
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn clear(&mut self) {
         *self = Self::new();
     }
@@ -120,7 +120,7 @@ impl<T> LinkedList<T> {
     /// list.clear();
     /// assert_eq!(list.is_empty(), true);
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn is_empty(&self) -> bool {
         return self.head.is_none();
     }
@@ -185,7 +185,7 @@ impl<T> LinkedList<T> {
     /// list.remove_back();
     /// assert_eq!(list, list!["Please", "don't", "remove"]);
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn remove_back(&mut self) {
         if self.tail != None {
             unsafe {
@@ -227,7 +227,7 @@ impl<T> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["Get", "This"];
     /// assert_eq!(list.get(1), Some(&"This"));
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn get(&self, index: usize) -> Option<&T> {
         return self.get_node(self.head, index);
     }
@@ -238,13 +238,13 @@ impl<T> LinkedList<T> {
     /// let list: LinkedList<&str> = list!["Get", "This"];
     /// assert_eq!(list.get_mut(1), Some(&mut "This"));
     /// ```
-    #[inline]
+    #[inline(always)]
     pub fn get_mut(&self, index: usize) -> Option<&mut T> {
         return self.get_node_mut(self.head, index);
     }
 
     /// Returns a reference to the `Node` at the front of the list.
-    #[inline]
+    #[inline(always)]
     pub fn front(&self) -> Option<&T> {
         if self.head.is_none() { return None; }
         
@@ -254,7 +254,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a mutable reference to the `Node` at the front of the list.
-    #[inline]
+    #[inline(always)]
     pub fn front_mut(&self) -> Option<&mut T> {
         if self.head.is_none() { return None; }
         
@@ -264,7 +264,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a reference to the `Node` at the back of the list.
-    #[inline]
+    #[inline(always)]
     pub fn back(&self) -> Option<&T> {
         if self.tail.is_none() { return None; }
         
@@ -274,7 +274,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a mutable reference to the `Node` at the back of the list.
-    #[inline]
+    #[inline(always)]
     pub fn back_mut(&self) -> Option<&mut T> {
         if self.tail.is_none() { return None; }
         
