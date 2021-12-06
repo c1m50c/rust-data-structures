@@ -405,6 +405,7 @@ impl<T: Copy> From<&[T]> for LinkedList<T> {
     }
 }
 
+
 impl<T: Copy, const N: usize> From<[T; N]> for LinkedList<T> {
     fn from(arr: [T; N]) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
