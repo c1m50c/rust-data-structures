@@ -1,11 +1,12 @@
 use super::node::Node;
 
-use std::ops::{Index, IndexMut};
-use std::option::Option;
-use std::cmp::PartialEq;
-use std::ptr::NonNull;
 use std::boxed::Box;
-use std::fmt;
+
+use core::ops::{Index, IndexMut};
+use core::option::Option;
+use core::cmp::PartialEq;
+use core::ptr::NonNull;
+use core::fmt;
 
 
 /// Shorthand Syntax for creating a new `LinkedList`.
