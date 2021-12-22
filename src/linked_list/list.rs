@@ -178,6 +178,25 @@ impl<T> LinkedList<T> {
         self.tail = node_ptr;
     }
 
+    /// Removes the first `Node` within the `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<&str> = list!["THIS", "will", "be", "removed."];
+    /// assert_eq!(list, list!["THIS", "will", "be", "removed."]);
+    /// list.remove_front();
+    /// assert_eq!(list, list!["will", "be", "removed."]);
+    /// ```
+    #[inline(always)]
+    pub fn remove_front(&mut self) {
+        if self.head.is_some() {
+            unsafe {
+                self.head = (*self.head.unwrap().as_ptr()).next;
+                if self.head.is_some() { (*self.head.unwrap().as_ptr()).previous = None; }
+                self.length -= 1;
+            }
+        }
+    }
+
     /// Removes the last `Node` within the `LinkedList`.
     /// ## Example:
     /// ```rust
@@ -188,9 +207,10 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline(always)]
     pub fn remove_back(&mut self) {
-        if self.tail != None {
+        if self.tail.is_some() {
             unsafe {
                 self.tail = (*self.tail.unwrap().as_ptr()).previous;
+                if self.tail.is_some() { (*self.tail.unwrap().as_ptr()).next = None; }
                 self.length -= 1;
             }
         }
@@ -502,24 +522,30 @@ mod tests {
     }
 
     #[test]
-    fn remove_back_integer() {
+    fn remove_integer() {
         let mut list: LinkedList<i32> = list![1, 2, 3];
         list.remove_back();
         assert_eq!(list, list![1, 2]);
+        list.remove_front();
+        assert_eq!(list, list![2]);
     }
 
     #[test]
-    fn remove_back_float() {
+    fn remove_float() {
         let mut list: LinkedList<f32> = list![1.0, 2.0, 3.0];
         list.remove_back();
         assert_eq!(list, list![1.0, 2.0]);
+        list.remove_front();
+        assert_eq!(list, list![2.0]);
     }
 
     #[test]
-    fn remove_back_str() {
+    fn remove_str() {
         let mut list: LinkedList<&str> = list!["One", "Two", "Three"];
         list.remove_back();
         assert_eq!(list, list!["One", "Two"]);
+        list.remove_front();
+        assert_eq!(list, list!["Two"]);
     }
 
     #[test]
