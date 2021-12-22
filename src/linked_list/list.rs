@@ -178,15 +178,66 @@ impl<T> LinkedList<T> {
         self.tail = node_ptr;
     }
 
+    /// Removes the first `Node` within the `LinkedList` and returns a reference to its `data` field.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+    /// let pop: Option<&i32> = list.pop_front();
+    /// assert_eq!(pop, Some(&1));
+    /// assert_eq!(list, list![2, 3, 4, 5]);
+    /// ```
+    #[inline]
+    pub fn pop_front(&mut self) -> Option<&T> {
+        if self.head.is_some() {
+            let value: &T;
+            
+            unsafe {
+                value = &self.head.unwrap().as_ref().data;
+                self.head = (*self.head.unwrap().as_ptr()).next;
+                if self.head.is_some() { (*self.head.unwrap().as_ptr()).previous = None; }
+            }
+            
+            self.length -= 1;
+            return Some(value);
+        }
+
+        return None;
+    }
+
+    /// Removes the last `Node` within the `LinkedList` and returns a reference to its `data` field.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+    /// let pop: Option<&i32> = list.pop_back();
+    /// assert_eq!(pop, Some(&5));
+    /// assert_eq!(list, list![1, 2, 3, 4]);
+    /// ```
+    #[inline]
+    pub fn pop_back(&mut self) -> Option<&T> {
+        if self.tail.is_some() {
+            let value: &T;
+            
+            unsafe {
+                value = &self.tail.unwrap().as_ref().data;
+                self.tail = (*self.tail.unwrap().as_ptr()).previous;
+                if self.tail.is_some() { (*self.tail.unwrap().as_ptr()).next = None; }
+            }
+            
+            self.length -= 1;
+            return Some(value);
+        }
+
+        return None;
+    }
+
     /// Removes the first `Node` within the `LinkedList`.
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<&str> = list!["THIS", "will", "be", "removed."];
-    /// assert_eq!(list, list!["THIS", "will", "be", "removed."]);
     /// list.remove_front();
     /// assert_eq!(list, list!["will", "be", "removed."]);
     /// ```
-    #[inline(always)]
+    #[inline]
     pub fn remove_front(&mut self) {
         if self.head.is_some() {
             unsafe {
@@ -201,11 +252,10 @@ impl<T> LinkedList<T> {
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<&str> = list!["Please", "don't", "remove", "ME!"];
-    /// assert_eq!(list, list!["Please", "don't", "remove", "ME!"]);
     /// list.remove_back();
     /// assert_eq!(list, list!["Please", "don't", "remove"]);
     /// ```
-    #[inline(always)]
+    #[inline]
     pub fn remove_back(&mut self) {
         if self.tail.is_some() {
             unsafe {
@@ -546,6 +596,19 @@ mod tests {
         assert_eq!(list, list!["One", "Two"]);
         list.remove_front();
         assert_eq!(list, list!["Two"]);
+    }
+
+    #[test]
+    fn pop() {
+        let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
+        
+        let pop_front = list.pop_front();
+        assert_eq!(pop_front, Some(&1));
+
+        let pop_back = list.pop_back();
+        assert_eq!(pop_back, Some(&5));
+        
+        assert_eq!(list, list![2, 3, 4]);
     }
 
     #[test]
