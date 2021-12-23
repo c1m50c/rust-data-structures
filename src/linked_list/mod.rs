@@ -424,13 +424,16 @@ impl<T: fmt::Display> fmt::Display for LinkedList<T> {
 impl<T: PartialEq> PartialEq for LinkedList<T> {
     fn eq(&self, other: &Self) -> bool {
         if self.len() != other.len() { return false; }
+        if self.len() == 0 { return true; }
 
-        for i in 0 .. self.len() {
-            // TODO: Optimize this code, the time complexity is wild due to the `get` calls.
-            let (sget, oget) = (self.get(i), other.get(i));
-            if sget.is_some() != oget.is_some() { return false; }
-            if sget.is_some() {
-                if sget.unwrap() != oget.unwrap() { return false; }
+        let mut s = self.head;
+        let mut o = other.head;
+
+        while s.is_some() && o.is_some() {
+            unsafe {
+                if s.unwrap().as_ref().data != o.unwrap().as_ref().data { return false; }
+                s = (*s.unwrap().as_ptr()).next;
+                o = (*o.unwrap().as_ptr()).next;
             }
         }
 
@@ -439,13 +442,16 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 
     fn ne(&self, other: &Self) -> bool {
         if self.len() != other.len() { return true; }
+        if self.len() == 0 { return false; }
 
-        for i in 0 .. self.len() {
-            // TODO: Optimize this code, the time complexity is wild due to the `get` calls.
-            let (sget, oget) = (self.get(i), other.get(i));
-            if sget.is_some() != oget.is_some() { return true; }
-            if sget.is_some() {
-                if sget.unwrap() != oget.unwrap() { return true; }
+        let mut s = self.head;
+        let mut o = other.head;
+
+        while s.is_some() && o.is_some() {
+            unsafe {
+                if s.unwrap().as_ref().data != o.unwrap().as_ref().data { return true; }
+                s = (*s.unwrap().as_ptr()).next;
+                o = (*o.unwrap().as_ptr()).next;
             }
         }
 
