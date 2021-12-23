@@ -3,9 +3,9 @@ use super::node::Node;
 use std::boxed::Box;
 
 use core::ops::{Index, IndexMut};
+use core::ptr::{NonNull, read as ptr_read};
 use core::option::Option;
 use core::cmp::PartialEq;
-use core::ptr::NonNull;
 use core::fmt;
 
 
@@ -182,17 +182,17 @@ impl<T> LinkedList<T> {
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
-    /// let pop: Option<&i32> = list.pop_front();
-    /// assert_eq!(pop, Some(&1));
+    /// let pop: Option<i32> = list.pop_front();
+    /// assert_eq!(pop, Some(1));
     /// assert_eq!(list, list![2, 3, 4, 5]);
     /// ```
     #[inline]
-    pub fn pop_front(&mut self) -> Option<&T> {
+    pub fn pop_front(&mut self) -> Option<T> {
         if self.head.is_some() {
-            let value: &T;
+            let value: T;
             
             unsafe {
-                value = &self.head.unwrap().as_ref().data;
+                value = ptr_read(&mut (*self.head.unwrap().as_mut()).data);
                 self.head = (*self.head.unwrap().as_ptr()).next;
                 if self.head.is_some() { (*self.head.unwrap().as_ptr()).previous = None; }
             }
@@ -208,17 +208,17 @@ impl<T> LinkedList<T> {
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
-    /// let pop: Option<&i32> = list.pop_back();
-    /// assert_eq!(pop, Some(&5));
+    /// let pop: Option<i32> = list.pop_back();
+    /// assert_eq!(pop, Some(5));
     /// assert_eq!(list, list![1, 2, 3, 4]);
     /// ```
     #[inline]
-    pub fn pop_back(&mut self) -> Option<&T> {
+    pub fn pop_back(&mut self) -> Option<T> {
         if self.tail.is_some() {
-            let value: &T;
+            let value: T;
             
             unsafe {
-                value = &self.tail.unwrap().as_ref().data;
+                value = ptr_read(&mut (*self.tail.unwrap().as_mut()).data);
                 self.tail = (*self.tail.unwrap().as_ptr()).previous;
                 if self.tail.is_some() { (*self.tail.unwrap().as_ptr()).next = None; }
             }
@@ -603,10 +603,10 @@ mod tests {
         let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
         
         let pop_front = list.pop_front();
-        assert_eq!(pop_front, Some(&1));
+        assert_eq!(pop_front, Some(1));
 
         let pop_back = list.pop_back();
-        assert_eq!(pop_back, Some(&5));
+        assert_eq!(pop_back, Some(5));
         
         assert_eq!(list, list![2, 3, 4]);
     }
