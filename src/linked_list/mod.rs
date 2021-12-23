@@ -586,6 +586,23 @@ mod tests {
     }
 
     #[test]
+    fn eq() {
+        let list1 = list![3, 2, 1];
+        let list2 = list![3, 2, 1];
+        assert_eq!(list1, list2);
+    }
+
+    #[test]
+    fn ne() {
+        let list1 = list![4, 0, 4];
+        let list2 = list![4, 0, 0];
+        assert_ne!(list1, list2);
+        
+        let list1 = list![4, 0, 4, 0];
+        assert_ne!(list1, list2);
+    }
+
+    #[test]
     fn index() {
         let list: LinkedList<&str> = list!["Hey", "this", "is", "a", "Linked", "List"];
         assert_eq!(list[0], "Hey");
