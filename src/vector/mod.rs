@@ -217,7 +217,16 @@ mod tests {
     use super::Vector;
 
     #[test]
-    fn create_integer_vector() {
+    fn create_vector() {
+        let mut vec: Vector<&str> = Vector::new();
+        vec.push("One");
+        vec.push("Two");
+        vec.push("Three");
+        vec.push("Four");
+        vec.push("Five");
+        assert_eq!(vec.capacity(), 8);
+        assert_eq!(vec.len(), 5);
+
         let mut vec: Vector<i32> = Vector::new();
         vec.push(1);
         vec.push(2);
@@ -226,10 +235,7 @@ mod tests {
         vec.push(5);
         assert_eq!(vec.capacity(), 8);
         assert_eq!(vec.len(), 5);
-    }
 
-    #[test]
-    fn create_float_vector() {
         let mut vec: Vector<f32> = Vector::new();
         vec.push(1.0);
         vec.push(2.0);
@@ -241,55 +247,31 @@ mod tests {
     }
 
     #[test]
-    fn create_str_vector() {
-        let mut vec: Vector<&str> = Vector::new();
-        vec.push("One");
-        vec.push("Two");
-        vec.push("Three");
-        vec.push("Four");
-        vec.push("Five");
-        assert_eq!(vec.capacity(), 8);
-        assert_eq!(vec.len(), 5);
-    }
+    fn get() {
+        let vec: Vector<f32> = vector![1.0, 2.0, 3.0, 4.0, 5.0];
+        assert_eq!(vec.get(2), Some(&3.0));
 
-    #[test]
-    fn get_integer() {
+        let vec: Vector<&str> = vector!["Hey", "You", "should", "get", "ME!"];
+        assert_eq!(vec.get(4), Some(&"ME!"));
+
         let vec: Vector<i32> = vector![1, 2, 3, 4, 5];
         assert_eq!(vec.get(2), Some(&3));
     }
 
     #[test]
-    fn get_float() {
-        let vec: Vector<f32> = vector![1.0, 2.0, 3.0, 4.0, 5.0];
-        assert_eq!(vec.get(2), Some(&3.0));
-    }
-
-    #[test]
-    fn get_str() {
-        let vec: Vector<&str> = vector!["Hey", "You", "should", "get", "ME!"];
-        assert_eq!(vec.get(4), Some(&"ME!"));
-    }
-
-    #[test]
-    fn get_mut_integer() {
+    fn get_mut() {
         let vec: Vector<i32> = vector![1, 2, 3, 4, 5];
         let got = vec.get_mut(2).unwrap();
         assert_eq!(vec.get_mut(2), Some(&mut 3));
         *got = 72;
         assert_eq!(vec.get_mut(2), Some(&mut 72));
-    }
 
-    #[test]
-    fn get_mut_float() {
         let vec: Vector<f32> = vector![1.0, 2.0, 3.0, 4.0, 5.0];
         let got = vec.get_mut(2).unwrap();
         assert_eq!(vec.get_mut(2), Some(&mut 3.0));
         *got = 72.0;
         assert_eq!(vec.get_mut(2), Some(&mut 72.0));
-    }
 
-    #[test]
-    fn get_mut_str() {
         let vec: Vector<&str> = vector!["Hey", "You", "should", "get", "ME!"];
         let got = vec.get_mut(4).unwrap();
         assert_eq!(vec.get_mut(4), Some(&mut "ME!"));
@@ -298,19 +280,13 @@ mod tests {
     }
 
     #[test]
-    fn search_for_integer() {
+    fn search() {
         let vec: Vector<i32> = vector![1337, 420, 3005, 666, 23];
         assert_eq!(vec.search(666), Some(3));
-    }
 
-    #[test]
-    fn search_for_float() {
         let vec: Vector<f32> = vector![3.14, 3.60, 5.55, 7.20, 45.0];
         assert_eq!(vec.search(5.55), Some(2));
-    }
 
-    #[test]
-    fn search_for_str() {
         let vec: Vector<&str> = vector!["Hey", "You", "maybe", "find", "this."];
         assert_eq!(vec.search("this."), Some(4));
     }
