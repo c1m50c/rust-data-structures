@@ -11,7 +11,7 @@ use core::cmp::PartialEq;
 use core::fmt;
 
 
-/// Shorthand Syntax for creating a new `LinkedList`.
+/// Macro that is the shorthanded syntax for creating a new `LinkedList`.
 /// ## Example:
 /// ```rust
 /// let mut list: LinkedList<u8> = LinkedList::new();
@@ -22,20 +22,19 @@ use core::fmt;
 /// ```
 #[macro_export]
 macro_rules! list {
-    ($($e:expr), *) => {
+    ($($e: expr), *) => {
         {
             #[allow(unused_mut)]
             let mut list = $crate::linked_list::LinkedList::new();
-            $(
-                list.push_back($e);
-            )*
+            $( list.push_back($e); )*
             list
         }
     };
 }
 
 
-/// Implementation of a Doubly Linked List.
+/// Rust Implementation of a Doubly Linked List.
+/// In modern times this Data Structure is virtually useless, due to the existence of vectors and cache optimizations.
 /// ## Fields:
 /// ```rust
 /// head: Option<NonNull<Node<T>>> // Node at the start of the List.
@@ -84,6 +83,15 @@ impl<T> LinkedList<T> {
 
 /* Public Methods */
 impl<T> LinkedList<T> {
+    /// Constructs a new empty `LinkedList`.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<f64> = LinkedList::new();
+    /// list.push_back(13.37);
+    /// list.push_back(4.04);
+    /// list.push_back(2.00);
+    /// assert_eq!(list, list![13.37, 4.04, 2.00]);
+    /// ```
     #[inline(always)]
     pub const fn new() -> Self {
         return Self {
@@ -418,6 +426,7 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
         if self.len() != other.len() { return false; }
 
         for i in 0 .. self.len() {
+            // TODO: Optimize this code, the time complexity is wild due to the `get` calls.
             let (sget, oget) = (self.get(i), other.get(i));
             if sget.is_some() != oget.is_some() { return false; }
             if sget.is_some() {
@@ -432,6 +441,7 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
         if self.len() != other.len() { return true; }
 
         for i in 0 .. self.len() {
+            // TODO: Optimize this code, the time complexity is wild due to the `get` calls.
             let (sget, oget) = (self.get(i), other.get(i));
             if sget.is_some() != oget.is_some() { return true; }
             if sget.is_some() {
