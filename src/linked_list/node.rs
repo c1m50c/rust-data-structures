@@ -20,7 +20,7 @@ pub struct Node<T> {
 
 
 impl<T> Node<T> {
-    pub fn new(data: T) -> Self {
+    pub const fn new(data: T) -> Self {
         return Self {
             previous: None,
             next: None,
@@ -56,19 +56,13 @@ mod tests {
     use super::Node;
 
     #[test]
-    fn create_integer_node() {
+    fn create_node() {
         let node = Node::new(0);
         assert_eq!(node, Node::new(0));
-    }
 
-    #[test]
-    fn create_float_node() {
         let node = Node::new(0.0);
         assert_eq!(node, Node::new(0.0));
-    }
 
-    #[test]
-    fn create_str_node() {
         let node = Node::new("Zero");
         assert_eq!(node, Node::new("Zero"));
     }

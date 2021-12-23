@@ -2,8 +2,8 @@ use super::node::Node;
 
 use std::boxed::Box;
 
-use core::ops::{Index, IndexMut};
 use core::ptr::{NonNull, read as ptr_read};
+use core::ops::{Index, IndexMut};
 use core::option::Option;
 use core::cmp::PartialEq;
 use core::fmt;
@@ -59,6 +59,7 @@ impl<T> LinkedList<T> {
                 0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
                 _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
             },
+            
             None => None,
         }
     }
@@ -72,6 +73,7 @@ impl<T> LinkedList<T> {
                 0 => Some( unsafe{ &mut (*next_ptr.as_ptr()).data } ),
                 _ => self.get_node_mut( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
             },
+
             None => None,
         }
     }
@@ -96,8 +98,21 @@ impl<T> LinkedList<T> {
     /// assert_eq!(list.len(), 5);
     /// ```
     #[inline(always)]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         return self.length;
+    }
+
+    /// Returns a `bool` that determines if the list is empty.
+    /// ## Example:
+    /// ```rust
+    /// let list: LinkedList<i32> = list![1, 2, 3];
+    /// assert_eq!(list.is_empty(), false);
+    /// list.clear();
+    /// assert_eq!(list.is_empty(), true);
+    /// ```
+    #[inline(always)]
+    pub const fn is_empty(&self) -> bool {
+        return self.head.is_none();
     }
 
     /// Clears the `LinkedList`, making it completely empty and resetting its `length`.
@@ -111,19 +126,6 @@ impl<T> LinkedList<T> {
     #[inline(always)]
     pub fn clear(&mut self) {
         *self = Self::new();
-    }
-
-    /// Returns a `bool` that determines if the list is empty.
-    /// ## Example:
-    /// ```rust
-    /// let list: LinkedList<i32> = list![1, 2, 3];
-    /// assert_eq!(list.is_empty(), false);
-    /// list.clear();
-    /// assert_eq!(list.is_empty(), true);
-    /// ```
-    #[inline(always)]
-    pub fn is_empty(&self) -> bool {
-        return self.head.is_none();
     }
 
     /// Pushes or prepends a new `Node` to the start of the `LinkedList`.
@@ -148,8 +150,8 @@ impl<T> LinkedList<T> {
             None => self.tail = node_ptr,
         }
 
-        self.head = node_ptr;
         self.length += 1;
+        self.head = node_ptr;
     }
 
     /// Pushes or appends a new `Node` to the end of the `LinkedList`.
@@ -491,7 +493,7 @@ mod tests {
     use super::LinkedList;
 
     #[test]
-    fn push_front_integer() {
+    fn push_front() {
         let mut list: LinkedList<i32> = LinkedList::new();
         list.push_front(1);
         list.push_front(2);
@@ -503,7 +505,7 @@ mod tests {
     }
 
     #[test]
-    fn push_back_integer() {
+    fn push_back() {
         let mut list: LinkedList<i32> = LinkedList::new();
         list.push_back(1);
         list.push_back(2);
@@ -511,54 +513,6 @@ mod tests {
         list.push_back(4);
         list.push_back(5);
         assert_eq!(list, list![1, 2, 3, 4, 5]);
-        assert_eq!(list.len(), 5);
-    }
-
-    #[test]
-    fn push_front_float() {
-        let mut list: LinkedList<f32> = LinkedList::new();
-        list.push_front(1.0);
-        list.push_front(2.0);
-        list.push_front(3.0);
-        list.push_front(4.0);
-        list.push_front(5.0);
-        assert_eq!(list, list![5.0, 4.0, 3.0, 2.0, 1.0]);
-        assert_eq!(list.len(), 5);
-    }
-
-    #[test]
-    fn pust_back_float() {
-        let mut list: LinkedList<f32> = LinkedList::new();
-        list.push_back(1.0);
-        list.push_back(2.0);
-        list.push_back(3.0);
-        list.push_back(4.0);
-        list.push_back(5.0);
-        assert_eq!(list, list![1.0, 2.0, 3.0, 4.0, 5.0]);
-        assert_eq!(list.len(), 5);
-    }
-
-    #[test]
-    fn push_front_str() {
-        let mut list: LinkedList<&str> = LinkedList::new();
-        list.push_front("1");
-        list.push_front("2");
-        list.push_front("3");
-        list.push_front("4");
-        list.push_front("5");
-        assert_eq!(list, list!["5", "4", "3", "2", "1"]);
-        assert_eq!(list.len(), 5);
-    }
-
-    #[test]
-    fn push_back_str() {
-        let mut list: LinkedList<&str> = LinkedList::new();
-        list.push_back("1");
-        list.push_back("2");
-        list.push_back("3");
-        list.push_back("4");
-        list.push_back("5");
-        assert_eq!(list, list!["1", "2", "3", "4", "5"]);
         assert_eq!(list.len(), 5);
     }
 
@@ -572,25 +526,7 @@ mod tests {
     }
 
     #[test]
-    fn remove_integer() {
-        let mut list: LinkedList<i32> = list![1, 2, 3];
-        list.remove_back();
-        assert_eq!(list, list![1, 2]);
-        list.remove_front();
-        assert_eq!(list, list![2]);
-    }
-
-    #[test]
-    fn remove_float() {
-        let mut list: LinkedList<f32> = list![1.0, 2.0, 3.0];
-        list.remove_back();
-        assert_eq!(list, list![1.0, 2.0]);
-        list.remove_front();
-        assert_eq!(list, list![2.0]);
-    }
-
-    #[test]
-    fn remove_str() {
+    fn remove() {
         let mut list: LinkedList<&str> = list!["One", "Two", "Three"];
         list.remove_back();
         assert_eq!(list, list!["One", "Two"]);
@@ -627,64 +563,22 @@ mod tests {
     }
 
     #[test]
-    fn get_integer() {
+    fn get() {
         let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
         assert_eq!(list.get(2), Some(&3));
     }
 
     #[test]
-    fn get_float() {
-        let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
-        assert_eq!(list.get(2), Some(&3.0));
-    }
-    
-    #[test]
-    fn get_str() {
-        let list: LinkedList<&str> = list!["Get", "This", "Ok?"];
-        assert_eq!(list.get(1), Some(&"This"));
-    }
-
-    #[test]
-    fn get_mut_integer() {
-        let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
-        let got = list.get_mut(2).unwrap();
-        assert_eq!(list.get_mut(2), Some(&mut 3));
-        *got = 6;
-        assert_eq!(list.get_mut(2), Some(&mut 6));
-    }
-
-    #[test]
-    fn get_mut_float() {
+    fn get_mut() {
         let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
         let got = list.get_mut(2).unwrap();
         assert_eq!(list.get_mut(2), Some(&mut 3.0));
         *got = 6.0;
         assert_eq!(list.get_mut(2), Some(&mut 6.0));
     }
-    
-    #[test]
-    fn get_mut_str() {
-        let list: LinkedList<&str> = list!["Get", "This", "Ok?"];
-        let got = list.get_mut(1).unwrap();
-        assert_eq!(list.get_mut(1), Some(&mut "This"));
-        *got = "This! but mutable..";
-        assert_eq!(list.get_mut(1), Some(&mut "This! but mutable.."));
-    }
 
     #[test]
-    fn search_for_integer() {
-        let list: LinkedList<i32> = list![1, 2, 3, 4, 5];
-        assert_eq!(list.search(3), Some(2));
-    }
-
-    #[test]
-    fn search_for_float() {
-        let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
-        assert_eq!(list.search(3.0), Some(2));
-    }
-
-    #[test]
-    fn search_for_str() {
+    fn search() {
         let list: LinkedList<&str> = list!["Search", "Idk", "Maybe", "This?"];
         assert_eq!(list.search("This?"), Some(3));
     }
