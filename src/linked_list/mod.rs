@@ -426,14 +426,13 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
         if self.len() != other.len() { return false; }
         if self.len() == 0 { return true; }
 
-        let mut s = self.head;
-        let mut o = other.head;
+        let (mut s, mut o) = (self.head, other.head);
 
-        while s.is_some() && o.is_some() {
+        while let (Some(a), Some(b)) = (s, o) {
             unsafe {
-                if s.unwrap().as_ref().data != o.unwrap().as_ref().data { return false; }
-                s = (*s.unwrap().as_ptr()).next;
-                o = (*o.unwrap().as_ptr()).next;
+                if a.as_ref().data != b.as_ref().data { return false; }
+                s = (*a.as_ptr()).next;
+                o = (*b.as_ptr()).next;
             }
         }
 
@@ -444,14 +443,13 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
         if self.len() != other.len() { return true; }
         if self.len() == 0 { return false; }
 
-        let mut s = self.head;
-        let mut o = other.head;
+        let (mut s, mut o) = (self.head, other.head);
 
-        while s.is_some() && o.is_some() {
+        while let (Some(a), Some(b)) = (s, o) {
             unsafe {
-                if s.unwrap().as_ref().data != o.unwrap().as_ref().data { return true; }
-                s = (*s.unwrap().as_ptr()).next;
-                o = (*o.unwrap().as_ptr()).next;
+                if a.as_ref().data != b.as_ref().data { return true; }
+                s = (*a.as_ptr()).next;
+                o = (*b.as_ptr()).next;
             }
         }
 
