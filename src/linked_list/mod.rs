@@ -56,10 +56,10 @@ impl<T> LinkedList<T> {
     /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index,
     /// and the passed `root` contains the `Node` at a given `next` reference.
     #[inline]
-    fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&T> {
+    fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&Node<T>> {
         match root {
             Some(next_ptr) => match index {
-                0 => Some( unsafe{ &(*next_ptr.as_ptr()).data } ),
+                0 => Some( unsafe{ &(*next_ptr.as_ptr()) } ),
                 _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
             },
             
@@ -70,10 +70,10 @@ impl<T> LinkedList<T> {
     /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index,
     /// and the passed `root` contains the `Node` at a given `next` reference.
     #[inline]
-    fn get_node_mut(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut T> {
+    fn get_node_mut(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut Node<T>> {
         match root {
             Some(next_ptr) => match index {
-                0 => Some( unsafe{ &mut (*next_ptr.as_ptr()).data } ),
+                0 => Some( unsafe{ &mut (*next_ptr.as_ptr()) } ),
                 _ => self.get_node_mut( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
             },
 
@@ -151,7 +151,7 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn push_front(&mut self, data: T) {
-        let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
+        let mut new_node = Box::new(Node::new(data));
         new_node.next = self.head;
         new_node.previous = None;
 
@@ -177,7 +177,7 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn push_back(&mut self, data: T) {
-        let mut new_node: Box<Node<T>> = Box::new(Node::new(data));
+        let mut new_node = Box::new(Node::new(data));
         new_node.previous = self.tail;
         new_node.next = None;
 
@@ -316,7 +316,11 @@ impl<T> LinkedList<T> {
     pub fn get(&self, index: usize) -> Option<&T> {
         if index == 0 { return self.front(); }
         else if index == self.length - 1 { return self.back(); }
-        return self.get_node(self.head, index);
+
+        match self.get_node(self.head, index) {
+            Some(node) => Some(&node.data),
+            None => None,
+        }
     }
 
     /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index.
@@ -329,7 +333,11 @@ impl<T> LinkedList<T> {
     pub fn get_mut(&self, index: usize) -> Option<&mut T> {
         if index == 0 { return self.front_mut(); }
         else if index == self.length - 1 { return self.back_mut(); }
-        return self.get_node_mut(self.head, index);
+        
+        match self.get_node_mut(self.head, index) {
+            Some(node) => Some(&mut node.data),
+            None => None,
+        }
     }
 
     /// Returns a reference to the `Node` at the front of the list.
