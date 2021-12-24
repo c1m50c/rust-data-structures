@@ -158,7 +158,7 @@ impl<T> LinkedList<T> {
         let node_ptr = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
 
         match self.head {
-            Some(head_ptr) => unsafe { (*head_ptr.as_ptr()).previous = node_ptr },
+            Some(ptr) => unsafe { (*ptr.as_ptr()).previous = node_ptr },
             None => self.tail = node_ptr,
         }
 
@@ -184,7 +184,7 @@ impl<T> LinkedList<T> {
         let node_ptr: Option<NonNull<Node<T>>> = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
 
         match self.tail {
-            Some(tail_ptr) => unsafe { (*tail_ptr.as_ptr()).next = node_ptr },
+            Some(ptr) => unsafe { (*ptr.as_ptr()).next = node_ptr },
             None => self.head = node_ptr,
         }
 
@@ -335,40 +335,36 @@ impl<T> LinkedList<T> {
     /// Returns a reference to the `Node` at the front of the list.
     #[inline(always)]
     pub fn front(&self) -> Option<&T> {
-        if self.head.is_none() { return None; }
-        
-        unsafe {
-            return Some(&self.head.unwrap().as_ref().data);
+        match self.head {
+            Some(ptr) => unsafe { Some(&ptr.as_ref().data) },
+            None => None,
         }
     }
 
     /// Returns a mutable reference to the `Node` at the front of the list.
     #[inline(always)]
     pub fn front_mut(&self) -> Option<&mut T> {
-        if self.head.is_none() { return None; }
-        
-        unsafe {
-            return Some(&mut self.head.unwrap().as_mut().data);
+        match self.head {
+            Some(mut ptr) => unsafe { Some(&mut ptr.as_mut().data) },
+            None => None,
         }
     }
 
     /// Returns a reference to the `Node` at the back of the list.
     #[inline(always)]
     pub fn back(&self) -> Option<&T> {
-        if self.tail.is_none() { return None; }
-        
-        unsafe {
-            return Some(&self.tail.unwrap().as_ref().data);
+        match self.tail {
+            Some(ptr) => unsafe { Some(&ptr.as_ref().data) },
+            None => None,
         }
     }
 
     /// Returns a mutable reference to the `Node` at the back of the list.
     #[inline(always)]
     pub fn back_mut(&self) -> Option<&mut T> {
-        if self.tail.is_none() { return None; }
-        
-        unsafe {
-            return Some(&mut self.tail.unwrap().as_mut().data);
+        match self.tail {
+            Some(mut ptr) => unsafe { Some(&mut ptr.as_mut().data) },
+            None => None,
         }
     }
 
@@ -380,7 +376,7 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn as_vector(&self) -> Vec<T> {
-        let mut vector= Vec::with_capacity(self.length);
+        let mut vector = Vec::with_capacity(self.length);
         let mut current = self.head;
 
         while let Some(x) = current {
