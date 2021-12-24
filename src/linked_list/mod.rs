@@ -3,7 +3,9 @@ pub(crate) mod node;
 use node::Node;
 
 use std::boxed::Box;
+use std::vec::Vec;
 
+use core::mem::{swap as mem_swap, replace as mem_replace};
 use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
 use core::option::Option;
@@ -289,7 +291,7 @@ impl<T> LinkedList<T> {
     #[inline]
     pub fn append_list(&mut self, other: &mut Self) {
         match self.tail {
-            None => std::mem::swap(self, other),
+            None => mem_swap(self, other),
             Some(mut stail_ptr) => {
                 if let Some(mut ohead_ptr) = other.head.take() {
                     unsafe {
@@ -298,7 +300,7 @@ impl<T> LinkedList<T> {
                     }
 
                     self.tail = other.tail.take();
-                    self.length += std::mem::replace(&mut other.length, 0);
+                    self.length += mem_replace(&mut other.length, 0);
                 }
             }
         }
@@ -312,6 +314,8 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline(always)]
     pub fn get(&self, index: usize) -> Option<&T> {
+        if index == 0 { return self.front(); }
+        else if index == self.length - 1 { return self.back(); }
         return self.get_node(self.head, index);
     }
 
@@ -323,6 +327,8 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline(always)]
     pub fn get_mut(&self, index: usize) -> Option<&mut T> {
+        if index == 0 { return self.front_mut(); }
+        else if index == self.length - 1 { return self.back_mut(); }
         return self.get_node_mut(self.head, index);
     }
 
@@ -364,6 +370,31 @@ impl<T> LinkedList<T> {
         unsafe {
             return Some(&mut self.tail.unwrap().as_mut().data);
         }
+    }
+
+    /// Returns the `LinkedList` as a `Vec`.
+    /// ## Example:
+    /// ```rust
+    /// let list = list![1, 3, 3, 7];
+    /// assert_eq!(list.as_vector(), vec![1, 3, 3, 7]);
+    /// ```
+    #[inline]
+    pub fn as_vector(&self) -> Vec<T> {
+        let mut vector= Vec::with_capacity(self.length);
+        let mut current = self.head;
+
+        while let Some(x) = current {
+            let value;
+
+            unsafe {
+                value = ptr_read(&(*x.as_ref()).data);
+                current = x.as_ref().next;
+            }
+
+            vector.push(value);
+        }
+        
+        return vector;
     }
 }
 
@@ -477,8 +508,8 @@ impl<T> IndexMut<usize> for LinkedList<T> {
 }
 
 
-impl<T: Copy> From<std::vec::Vec<T>> for LinkedList<T> {
-    fn from(vec: std::vec::Vec<T>) -> Self {
+impl<T: Copy> From<Vec<T>> for LinkedList<T> {
+    fn from(vec: Vec<T>) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
         for i in 0 .. vec.len() { list.push_back(vec[i]); }
         return list;
@@ -672,5 +703,11 @@ mod tests {
         let arr: [i32; 3] = [1, 2, 3];
         let list = LinkedList::from(arr);
         assert_eq!(list, list![1, 2, 3]);
+    }
+
+    #[test]
+    fn as_vector() {
+        let list = list![1, 3, 3, 7];
+        assert_eq!(list.as_vector(), vec![1, 3, 3, 7]);
     }
 }
