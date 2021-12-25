@@ -292,11 +292,11 @@ impl<T> LinkedList<T> {
     pub fn append_list(&mut self, other: &mut Self) {
         match self.tail {
             None => mem_swap(self, other),
-            Some(mut stail_ptr) => {
-                if let Some(mut ohead_ptr) = other.head.take() {
+            Some(mut self_ptr) => {
+                if let Some(mut other_ptr) = other.head.take() {
                     unsafe {
-                        stail_ptr.as_mut().next = Some(ohead_ptr);
-                        ohead_ptr.as_mut().previous = Some(stail_ptr);
+                        self_ptr.as_mut().next = Some(other_ptr);
+                        other_ptr.as_mut().previous = Some(self_ptr);
                     }
 
                     self.tail = other.tail.take();
@@ -387,12 +387,12 @@ impl<T> LinkedList<T> {
         let mut vector = Vec::with_capacity(self.length);
         let mut current = self.head;
 
-        while let Some(x) = current {
+        while let Some(ptr) = current {
             let value;
 
             unsafe {
-                value = ptr_read(&(*x.as_ref()).data);
-                current = x.as_ref().next;
+                value = ptr_read(&(*ptr.as_ref()).data);
+                current = ptr.as_ref().next;
             }
 
             vector.push(value);
