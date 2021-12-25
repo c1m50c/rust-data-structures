@@ -439,19 +439,16 @@ impl<T: fmt::Display> fmt::Display for LinkedList<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.length == 0 { return write!(f, "[]"); }
 
-        let mut ret: String = String::from("[");
-        let mut next_node: Option<NonNull<Node<T>>> = self.head;
+        let mut result = String::from("[");
+        let mut next_node = self.head;
 
-        while next_node != None {
-            unsafe {
-                let node_ref: &Node<T> = next_node.unwrap().as_ref();
-                ret.push_str(format!("{}, ", node_ref).as_str());
-                next_node = node_ref.next;
-            }
+        while let Some(ptr) = next_node {
+            let ptr_ref = unsafe { ptr.as_ref() };
+            result.push_str(format!("{}, ", ptr_ref).as_str());
+            next_node = ptr_ref.next;
         }
 
-        ret = ret.strip_suffix(", ").unwrap().to_string();
-        return write!(f, "{}", ret + "]");
+        return write!(f, "{}", result.strip_suffix(", ").unwrap().to_string() + "]");
     }
 }
 
