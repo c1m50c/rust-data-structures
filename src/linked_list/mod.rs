@@ -58,9 +58,9 @@ impl<T> LinkedList<T> {
     #[inline]
     fn get_node(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&Node<T>> {
         match root {
-            Some(next_ptr) => match index {
-                0 => Some( unsafe{ &(*next_ptr.as_ptr()) } ),
-                _ => self.get_node( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
+            Some(ptr) => match index {
+                0 => Some( unsafe{ &(*ptr.as_ptr()) } ),
+                _ => self.get_node( unsafe { (*ptr.as_ptr()).next }, index - 1 ),
             },
             
             None => None,
@@ -72,9 +72,9 @@ impl<T> LinkedList<T> {
     #[inline]
     fn get_node_mut(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut Node<T>> {
         match root {
-            Some(next_ptr) => match index {
-                0 => Some( unsafe{ &mut (*next_ptr.as_ptr()) } ),
-                _ => self.get_node_mut( unsafe { (*next_ptr.as_ptr()).next }, index - 1 ),
+            Some(ptr) => match index {
+                0 => Some( unsafe{ &mut (*ptr.as_ptr()) } ),
+                _ => self.get_node_mut( unsafe { (*ptr.as_ptr()).next }, index - 1 ),
             },
 
             None => None,
@@ -278,6 +278,8 @@ impl<T> LinkedList<T> {
                 self.length -= 1;
             }
         }
+
+        
     }
 
     /// Appends another list to the end of the list.
@@ -440,12 +442,12 @@ impl<T: fmt::Display> fmt::Display for LinkedList<T> {
         if self.length == 0 { return write!(f, "[]"); }
 
         let mut result = String::from("[");
-        let mut next_node = self.head;
+        let mut current = self.head;
 
-        while let Some(ptr) = next_node {
+        while let Some(ptr) = current {
             let ptr_ref = unsafe { ptr.as_ref() };
             result.push_str(format!("{}, ", ptr_ref).as_str());
-            next_node = ptr_ref.next;
+            current = ptr_ref.next;
         }
 
         return write!(f, "{}", result.strip_suffix(", ").unwrap().to_string() + "]");
@@ -460,11 +462,11 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
 
         let (mut s, mut o) = (self.head, other.head);
 
-        while let (Some(a), Some(b)) = (s, o) {
+        while let (Some(s_ptr), Some(o_ptr)) = (s, o) {
             unsafe {
-                if a.as_ref().data != b.as_ref().data { return false; }
-                s = (*a.as_ptr()).next;
-                o = (*b.as_ptr()).next;
+                if s_ptr.as_ref().data != o_ptr.as_ref().data { return false; }
+                s = (*s_ptr.as_ptr()).next;
+                o = (*o_ptr.as_ptr()).next;
             }
         }
 
