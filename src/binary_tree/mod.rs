@@ -21,7 +21,11 @@ impl<T> BinaryTree<T> {
     pub const fn new() -> Self {
         return Self {
             root: None,
-        }
+        };
+    }
+
+    pub fn clear(&mut self) {
+        *self = Self::new();
     }
 }
 
@@ -66,5 +70,15 @@ mod tests {
         tree.insert(15);
         tree.insert(5);
         tree.insert(20);
+    }
+
+    #[test]
+    #[ignore]
+    fn clear() {
+        // TODO: Complete Test, Needs `PartialEq` Trait
+        let mut tree = BinaryTree::new();
+        tree.insert("Swag");
+        tree.clear();
+        // assert_eq!(tree, BinaryTree::new());
     }
 }
