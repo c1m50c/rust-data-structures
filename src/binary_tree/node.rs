@@ -6,25 +6,53 @@ use std::fmt;
 /// Struct for creating the `Node`s of a `BinaryTree`.
 /// ## Fields:
 /// ```rust
-/// pub left: Option<NonNull<Node<T>>> // Left child Node within the Tree.
-/// pub right: Option<NonNull<Node<T>>> // Right child Node within the Tree.
-/// pub data: T // Data of the Node.
+/// left: Option<NonNull<Node<T>>> // Left child Node within the Tree.
+/// right: Option<NonNull<Node<T>>> // Right child Node within the Tree.
+/// data: T // Data of the Node.
 /// ```
 #[derive(Debug)]
 pub struct Node<T> {
-    pub left: Option<NonNull<Node<T>>>,
-    pub right: Option<NonNull<Node<T>>>,
-    pub data: T
+    left: Option<NonNull<Node<T>>>,
+    right: Option<NonNull<Node<T>>>,
+    data: T,
 }
 
 
 impl<T> Node<T> {
-    pub fn new(data: T) -> Self {
+    pub const fn new(data: T) -> Self {
         return Self {
             left: None,
             right: None,
             data,
         };
+    }
+
+    pub const fn get_data(&self) -> &T {
+        return &self.data;
+    }
+
+    pub fn get_data_mut(&mut self) -> &mut T {
+        return &mut self.data;
+    }
+}
+
+
+impl<T: PartialOrd> Node<T> {
+    pub fn insert(&mut self, data: T) {
+        if self.data == data { return; }
+
+        let target;
+        if data < self.data { target = &mut self.left; }
+        else { target = &mut self.right; }
+
+        match target {
+            &mut Some(ptr) => unsafe { (*ptr.as_ptr()).insert(data); },
+
+            &mut None => unsafe {
+                let node = Box::new(Node::new(data));
+                *target = Some(NonNull::new_unchecked(Box::into_raw(node)));
+            },
+        }
     }
 }
 
@@ -48,19 +76,13 @@ mod tests {
     use super::Node;
 
     #[test]
-    fn create_integer_node() {
+    fn create_node() {
         let node: Node<i32> = Node::new(0);
         assert_eq!(node.data, 0);
-    }
 
-    #[test]
-    fn create_float_node() {
         let node: Node<f32> = Node::new(0.0);
         assert_eq!(node.data, 0.0);
-    }
 
-    #[test]
-    fn create_str_node() {
         let node: Node<&str> = Node::new("BinaryTree Node");
         assert_eq!(node.data, "BinaryTree Node");
     }
