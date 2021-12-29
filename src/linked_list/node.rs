@@ -1,7 +1,7 @@
-use std::option::Option;
-use std::cmp::PartialEq;
-use std::ptr::NonNull;
-use std::fmt;
+use core::option::Option;
+use core::cmp::PartialEq;
+use core::ptr::NonNull;
+use core::fmt;
 
 
 /// `Node` to be used in creating a `LinkedList`.
