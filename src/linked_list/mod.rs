@@ -466,13 +466,13 @@ impl<T: PartialEq> LinkedList<T> {
     #[inline]
     pub fn search(&self, finding: T) -> Option<usize> {
         let mut current = self.head;
+        let mut index = 0;
 
-        for i in 0 .. self.length {
-            unsafe {
-                let node_ref = current.unwrap().as_ref();
-                if node_ref.data == finding { return Some(i); }
-                current = node_ref.next;
-            }
+        while let Some(ptr) = current {
+            let node_ref = unsafe { ptr.as_ref() };
+            if node_ref.data == finding { return Some(index); }
+            current = node_ref.next;
+            index += 1;
         }
 
         return None;
