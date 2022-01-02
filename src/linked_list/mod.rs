@@ -181,7 +181,7 @@ impl<T> LinkedList<T> {
         new_node.previous = self.tail;
         new_node.next = None;
 
-        let node_ptr: Option<NonNull<Node<T>>> = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
+        let node_ptr = unsafe { Some(NonNull::new_unchecked(Box::into_raw(new_node))) };
 
         match self.tail {
             Some(ptr) => unsafe { (*ptr.as_ptr()).next = node_ptr },
@@ -202,13 +202,15 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn pop_front(&mut self) -> Option<T> {
-        if self.head.is_some() {
+        if let Some(mut ptr) = self.head {
             let value: T;
             
             unsafe {
-                value = ptr_read(&mut (*self.head.unwrap().as_mut()).data);
+                value = ptr_read(&mut (*ptr.as_mut()).data);
                 self.head = (*self.head.unwrap().as_ptr()).next;
-                if self.head.is_some() { (*self.head.unwrap().as_ptr()).previous = None; }
+                if let Some(ptr) = self.head {
+                    (*ptr.as_ptr()).previous = None;
+                }
             }
             
             self.length -= 1;
@@ -228,13 +230,15 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn pop_back(&mut self) -> Option<T> {
-        if self.tail.is_some() {
+        if let Some(mut ptr) = self.tail {
             let value: T;
             
             unsafe {
-                value = ptr_read(&mut (*self.tail.unwrap().as_mut()).data);
+                value = ptr_read(&mut (*ptr.as_mut()).data);
                 self.tail = (*self.tail.unwrap().as_ptr()).previous;
-                if self.tail.is_some() { (*self.tail.unwrap().as_ptr()).next = None; }
+                if let Some(ptr) = self.tail {
+                    (*ptr.as_ptr()).next = None;
+                }
             }
             
             self.length -= 1;
