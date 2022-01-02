@@ -253,12 +253,15 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn remove_front(&mut self) {
-        if self.head.is_some() {
+        if let Some(ptr) = self.head {
             unsafe {
-                self.head = (*self.head.unwrap().as_ptr()).next;
-                if self.head.is_some() { (*self.head.unwrap().as_ptr()).previous = None; }
-                self.length -= 1;
+                self.head = (*ptr.as_ptr()).next;
+                if let Some(ptr) = self.head {
+                    (*ptr.as_ptr()).previous = None;
+                }
             }
+
+            self.length -= 1;
         }
     }
 
@@ -271,12 +274,15 @@ impl<T> LinkedList<T> {
     /// ```
     #[inline]
     pub fn remove_back(&mut self) {
-        if self.tail.is_some() {
+        if let Some(ptr) = self.tail {
             unsafe {
-                self.tail = (*self.tail.unwrap().as_ptr()).previous;
-                if self.tail.is_some() { (*self.tail.unwrap().as_ptr()).next = None; }
-                self.length -= 1;
+                self.tail = (*ptr.as_ptr()).previous;
+                if let Some(ptr) = self.tail {
+                    (*ptr.as_ptr()).next = None;
+                }
             }
+
+            self.length -= 1;
         }
 
         
@@ -293,7 +299,6 @@ impl<T> LinkedList<T> {
     #[inline]
     pub fn append_list(&mut self, other: &mut Self) {
         match self.tail {
-            None => mem_swap(self, other),
             Some(mut self_ptr) => {
                 if let Some(mut other_ptr) = other.head.take() {
                     unsafe {
@@ -304,7 +309,9 @@ impl<T> LinkedList<T> {
                     self.tail = other.tail.take();
                     self.length += mem_replace(&mut other.length, 0);
                 }
-            }
+            },
+
+            None => { mem_swap(self, other); },
         }
     }
 
@@ -415,13 +422,13 @@ impl<T: PartialEq> LinkedList<T> {
     /// ```
     #[inline]
     pub fn search(&self, finding: T) -> Option<usize> {
-        let mut next_node = self.head;
+        let mut current = self.head;
 
         for i in 0 .. self.length {
             unsafe {
-                let node_ref = next_node.unwrap().as_ref();
+                let node_ref = current.unwrap().as_ref();
                 if node_ref.data == finding { return Some(i); }
-                next_node = next_node.unwrap().as_ref().next;
+                current = node_ref.next;
             }
         }
 
@@ -471,23 +478,6 @@ impl<T: PartialEq> PartialEq for LinkedList<T> {
         }
 
         return true;
-    }
-
-    fn ne(&self, other: &Self) -> bool {
-        if self.len() != other.len() { return true; }
-        if self.len() == 0 { return false; }
-
-        let (mut s, mut o) = (self.head, other.head);
-
-        while let (Some(a), Some(b)) = (s, o) {
-            unsafe {
-                if a.as_ref().data != b.as_ref().data { return true; }
-                s = (*a.as_ptr()).next;
-                o = (*b.as_ptr()).next;
-            }
-        }
-
-        return false;
     }
 }
 
