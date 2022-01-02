@@ -192,6 +192,45 @@ impl<T> LinkedList<T> {
         self.tail = node_ptr;
     }
 
+    /// Inserts a new `Node` into the `LinkedList` at the given index.
+    /// ## Example:
+    /// ```rust
+    /// let mut list: LinkedList<u64> = list![1, 3];
+    /// list.insert(3, 1);
+    /// assert_eq!(list, list![1, 2, 3]);
+    /// assert_eq!(list.len(), 3);
+    /// assert_eq!(list[1], 3);
+    /// ```
+    pub fn insert(&mut self, data: T, index: usize) {
+        let mut current = self.head;
+        let mut i = 0;
+
+        while let Some(mut ptr) = current {
+            if index == i {
+                let mut new_node = Box::new(Node::new(data));
+
+                new_node.previous = unsafe { ptr.as_ref().previous };
+                new_node.next = Some(ptr);
+
+                unsafe {
+                    let node_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
+                    ptr.as_mut().previous = node_ptr;
+                    
+                    // TODO: 🧼 Probs some cleanup potential here, unwrapping is a bit sloppy.
+                    if let Some(mut ptr) = node_ptr.unwrap().as_mut().previous {
+                        ptr.as_mut().next = node_ptr;
+                    }
+                }
+
+                self.length += 1;
+                return;
+            }
+
+            i += 1;
+            current = unsafe { ptr.as_ref().next };
+        }
+    }
+
     /// Removes the first `Node` within the `LinkedList` and returns a reference to its `data` field.
     /// ## Example:
     /// ```rust
@@ -706,5 +745,14 @@ mod tests {
     fn as_vector() {
         let list = list![1, 3, 3, 7];
         assert_eq!(list.as_vector(), vec![1, 3, 3, 7]);
+    }
+
+    #[test]
+    fn insert() {
+        let mut list = list![1, 1];
+        list.insert(2, 1);
+        assert_eq!(list, list![1, 2, 1]);
+        assert_eq!(list.length, 3);
+        assert_eq!(list[1], 2);
     }
 }
