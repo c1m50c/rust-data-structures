@@ -10,6 +10,7 @@ use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
 use core::option::Option;
 use core::cmp::PartialEq;
+use core::str::FromStr;
 use core::fmt;
 
 
@@ -24,7 +25,7 @@ use core::fmt;
 /// ```
 #[macro_export]
 macro_rules! list {
-    ($($e: expr), *) => {
+    ($($e:expr), *) => {
         {
             #[allow(unused_mut)]
             let mut list = $crate::linked_list::LinkedList::new();
@@ -213,12 +214,12 @@ impl<T> LinkedList<T> {
                 new_node.next = Some(ptr);
 
                 unsafe {
-                    let node_ptr = Some(NonNull::new_unchecked(Box::into_raw(new_node)));
-                    ptr.as_mut().previous = node_ptr;
+                    let mut node_ptr = NonNull::new_unchecked(Box::into_raw(new_node));
+                    ptr.as_mut().previous = Some(node_ptr);
                     
                     // TODO: 🧼 Probs some cleanup potential here, unwrapping is a bit sloppy.
-                    if let Some(mut ptr) = node_ptr.unwrap().as_mut().previous {
-                        ptr.as_mut().next = node_ptr;
+                    if let Some(mut ptr) = node_ptr.as_mut().previous {
+                        ptr.as_mut().next = Some(node_ptr);
                     }
                 }
 
@@ -571,6 +572,27 @@ impl<T: Copy, const N: usize> From<[T; N]> for LinkedList<T> {
 }
 
 
+impl<T: FromStr> FromStr for LinkedList<T> {
+    type Err = T::Err;
+    
+    /*
+        NOTE: Formatting for correct parsing is not the same as LinkedList's `display` trait output.
+        "5 4 3 2 1".parse::<LinkedList<i32>>().unwrap() == list![5, 4, 3, 2, 1]
+    */
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut result: LinkedList<T> = LinkedList::new();
+        let split = s.split(" ");
+
+        for s in split {
+            let x = s.parse::<T>()?;
+            result.push_back(x);
+        }
+
+        return Ok(result);
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::LinkedList;
@@ -739,6 +761,12 @@ mod tests {
         let arr: [i32; 3] = [1, 2, 3];
         let list = LinkedList::from(arr);
         assert_eq!(list, list![1, 2, 3]);
+    }
+
+    #[test]
+    fn from_str() {
+        let x = "5 4 3 2 1";
+        assert_eq!(x.parse::<LinkedList<i32>>().unwrap(), list![5, 4, 3, 2, 1]);
     }
 
     #[test]
