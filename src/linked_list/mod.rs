@@ -8,9 +8,9 @@ use std::boxed::Box;
 use std::vec::Vec;
 
 use core::mem::{swap as mem_swap, replace as mem_replace};
+use core::iter::{FusedIterator, FromIterator};
 use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
-use core::iter::FusedIterator;
 use core::option::Option;
 use core::cmp::PartialEq;
 use core::str::FromStr;
@@ -571,7 +571,7 @@ impl<T> Clone for LinkedList<T> {
 
 impl<T: Copy> From<Vec<T>> for LinkedList<T> {
     fn from(vec: Vec<T>) -> Self {
-        let mut list: LinkedList<T> = LinkedList::new();
+        let mut list = Self::new();
         for i in 0 .. vec.len() { list.push_back(vec[i]); }
         return list;
     }
@@ -580,7 +580,7 @@ impl<T: Copy> From<Vec<T>> for LinkedList<T> {
 
 impl<T: Copy> From<&[T]> for LinkedList<T> {
     fn from(slice: &[T]) -> Self {
-        let mut list: LinkedList<T> = LinkedList::new();
+        let mut list = Self::new();
         for i in 0 .. slice.len() { list.push_back(slice[i]); }
         return list;
     }
@@ -589,7 +589,7 @@ impl<T: Copy> From<&[T]> for LinkedList<T> {
 
 impl<T: Copy, const N: usize> From<[T; N]> for LinkedList<T> {
     fn from(arr: [T; N]) -> Self {
-        let mut list: LinkedList<T> = LinkedList::new();
+        let mut list = Self::new();
         for i in 0 .. N { list.push_back(arr[i]); }
         return list;
     }
@@ -604,7 +604,7 @@ impl<T: FromStr> FromStr for LinkedList<T> {
         "5 4 3 2 1".parse::<LinkedList<i32>>().unwrap() == list![5, 4, 3, 2, 1]
     */
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut result: LinkedList<T> = LinkedList::new();
+        let mut result = Self::new();
         let split = s.split(" ");
 
         for s in split {
