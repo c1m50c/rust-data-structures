@@ -187,3 +187,15 @@ fn insert() {
     assert_eq!(list.length, 3);
     assert_eq!(list[1], 2);
 }
+
+
+#[test]
+fn iterator() {
+    let mut sum = 0;
+
+    for i in list![1, 3, 3, 7, 3, 0, 0, 5] {
+        sum += i;
+    }
+
+    assert_eq!(sum, 22);
+}

@@ -10,6 +10,7 @@ use std::vec::Vec;
 use core::mem::{swap as mem_swap, replace as mem_replace};
 use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
+use core::iter::FusedIterator;
 use core::option::Option;
 use core::cmp::PartialEq;
 use core::str::FromStr;
@@ -56,6 +57,12 @@ pub struct LinkedList<T> {
     head: Option<NonNull<Node<T>>>,
     tail: Option<NonNull<Node<T>>>,
     length: usize,
+}
+
+
+#[derive(Clone)]
+pub struct IntoIter<T> {
+    list: LinkedList<T>,
 }
 
 
@@ -552,6 +559,16 @@ impl<T> IndexMut<usize> for LinkedList<T> {
 }
 
 
+impl<T> Copy for LinkedList<T> {  }
+
+
+impl<T> Clone for LinkedList<T> {
+    fn clone(&self) -> Self {
+        return *self;
+    }
+}
+
+
 impl<T: Copy> From<Vec<T>> for LinkedList<T> {
     fn from(vec: Vec<T>) -> Self {
         let mut list: LinkedList<T> = LinkedList::new();
@@ -596,5 +613,43 @@ impl<T: FromStr> FromStr for LinkedList<T> {
         }
 
         return Ok(result);
+    }
+}
+
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    #[inline(always)]
+    fn next(&mut self) -> Option<T> {
+        return self.list.pop_front();
+    }
+
+    #[inline(always)]
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        return (self.list.length, Some(self.list.length));
+    }
+}
+
+
+impl<T> DoubleEndedIterator for IntoIter<T> {
+    #[inline(always)]
+    fn next_back(&mut self) -> Option<Self::Item> {
+        return self.list.pop_back();
+    }
+}
+
+
+impl<T> ExactSizeIterator for IntoIter<T> {  }
+impl<T> FusedIterator for IntoIter<T> {  }
+
+
+impl<T> IntoIterator for LinkedList<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+
+    #[inline(always)]
+    fn into_iter(self) -> Self::IntoIter {
+        return Self::IntoIter { list: self };
     }
 }
