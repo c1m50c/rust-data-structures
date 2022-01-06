@@ -8,9 +8,9 @@ use std::boxed::Box;
 use std::vec::Vec;
 
 use core::mem::{swap as mem_swap, replace as mem_replace};
-use core::iter::{FusedIterator, FromIterator};
 use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
+use core::iter::FusedIterator;
 use core::option::Option;
 use core::cmp::PartialEq;
 use core::str::FromStr;
@@ -85,7 +85,7 @@ impl<T> LinkedList<T> {
     /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index,
     /// and the passed `root` contains the `Node` at a given `next` reference.
     #[inline]
-    fn get_node_mut(&self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut Node<T>> {
+    fn get_node_mut(&mut self, root: Option<NonNull<Node<T>>>, index: usize) -> Option<&mut Node<T>> {
         match root {
             Some(ptr) => match index {
                 0 => Some( unsafe{ &mut (*ptr.as_ptr()) } ),
@@ -397,7 +397,7 @@ impl<T> LinkedList<T> {
     /// assert_eq!(list.get_mut(1), Some(&mut "This"));
     /// ```
     #[inline(always)]
-    pub fn get_mut(&self, index: usize) -> Option<&mut T> {
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
         if index == 0 { return self.front_mut(); }
         else if index == self.length - 1 { return self.back_mut(); }
         

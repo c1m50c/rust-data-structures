@@ -79,11 +79,11 @@ fn get() {
 
 #[test]
 fn get_mut() {
-    let list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
-    let got = list.get_mut(2).unwrap();
+    let mut list: LinkedList<f32> = list![1.0, 2.0, 3.0, 4.0, 5.0];
     assert_eq!(list.get_mut(2), Some(&mut 3.0));
-    *got = 6.0;
-    assert_eq!(list.get_mut(2), Some(&mut 6.0));
+    let got = list.get_mut(2).unwrap();
+    *got = 5.0;
+    assert_eq!(list.get_mut(2), Some(&mut 5.0));
 }
 
 #[test]
