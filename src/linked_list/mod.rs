@@ -231,7 +231,6 @@ impl<T> LinkedList<T> {
                     let mut node_ptr = NonNull::new_unchecked(Box::into_raw(new_node));
                     ptr.as_mut().previous = Some(node_ptr);
                     
-                    // TODO: 🧼 Probs some cleanup potential here, unwrapping is a bit sloppy.
                     if let Some(mut ptr) = node_ptr.as_mut().previous {
                         ptr.as_mut().next = Some(node_ptr);
                     }
