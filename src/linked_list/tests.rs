@@ -182,11 +182,22 @@ fn as_vector() {
 fn insert() {
     let mut list = list![1, 1];
     list.insert(2, 1);
+
     assert_eq!(list, list![1, 2, 1]);
     assert_eq!(list.length, 3);
     assert_eq!(list[1], 2);
-}
 
+    list.push_back(0);
+    list.push_front(0);
+    assert_eq!(list, list![0, 1, 2, 1, 0]);
+    assert_eq!(list.length, 5);
+    assert_eq!(list[2], 2);
+
+    list.insert(0, 2);
+    assert_eq!(list, list![0, 1, 0, 2, 1, 0]);
+    assert_eq!(list.length, 6);
+    assert_eq!(list[2], 0);
+}
 
 #[test]
 fn iterator() {
