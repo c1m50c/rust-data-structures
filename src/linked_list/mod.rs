@@ -21,6 +21,7 @@ use core::fmt;
 #[allow(unused_imports)]
 pub mod macros {
     /// Macro that is the shorthanded syntax for creating a new `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<u8> = LinkedList::new();
@@ -46,6 +47,7 @@ pub mod macros {
 
 /// Rust Implementation of a Doubly Linked List.
 /// In modern times this Data Structure is virtually useless, due to the existence of vectors and cache optimizations.
+/// 
 /// ## Fields:
 /// ```rust
 /// head: Option<NonNull<Node<T>>> // Node at the start of the List.
@@ -115,6 +117,7 @@ impl<T> LinkedList<T> {
 /* Public Methods */
 impl<T> LinkedList<T> {
     /// Constructs a new empty `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<f64> = LinkedList::new();
@@ -133,6 +136,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns the `length` of the `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list: LinkedList<&str> = list!["This", "is", "a", "Linked", "List"];
@@ -144,6 +148,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a `bool` that determines if the list is empty.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list: LinkedList<i32> = list![1, 2, 3];
@@ -157,6 +162,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Clears the `LinkedList`, making it completely empty and resetting its `length`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<&str> = list!["Hey", "how", "it", "b"];
@@ -170,6 +176,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Pushes or prepends a new `Node` to the start of the `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = LinkedList::new();
@@ -196,6 +203,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Pushes or appends a new `Node` to the end of the `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = LinkedList::new();
@@ -222,6 +230,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Inserts a new `Node` into the `LinkedList` at the given index.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<u64> = list![1, 3];
@@ -260,6 +269,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Removes the first `Node` within the `LinkedList` and returns a reference to its `data` field.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
@@ -288,6 +298,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Removes the last `Node` within the `LinkedList` and returns a reference to its `data` field.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
@@ -316,6 +327,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Removes the first `Node` within the `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<&str> = list!["THIS", "will", "be", "removed."];
@@ -337,6 +349,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Removes the last `Node` within the `LinkedList`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list: LinkedList<&str> = list!["Please", "don't", "remove", "ME!"];
@@ -359,16 +372,21 @@ impl<T> LinkedList<T> {
         
     }
 
-    /// Appends another list to the end of the list.
+    /// Appends the contents of another list to the end of the list.
+    /// Upon finishing the appending of elements, the other list will be empty.
+    /// 
     /// ## Example:
     /// ```rust
     /// let mut list_one: LinkedList<i32> = list![1, 2, 3];
     /// let mut list_two: LinkedList<i32> = list![4, 5, 6];
-    /// list_one.append_list(&mut list_two);
+    /// list_one.append(&mut list_two);
+    /// 
     /// assert_eq!(list_one, list![1, 2, 3, 4, 5, 6]);
+    /// assert_eq!(list_one.len(), 6);
+    /// assert!(list_two.is_empty());
     /// ```
     #[inline]
-    pub fn append_list(&mut self, other: &mut Self) {
+    pub fn append(&mut self, other: &mut Self) {
         match self.tail {
             Some(mut self_ptr) => {
                 if let Some(mut other_ptr) = other.head.take() {
@@ -387,6 +405,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a reference to a `Node`'s data value if the `Node` is present at the given index.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list: LinkedList<&str> = list!["Get", "This"];
@@ -404,6 +423,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns a mutable reference to a `Node`'s data value if the `Node` is present at the given index.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list: LinkedList<&str> = list!["Get", "This"];
@@ -457,6 +477,7 @@ impl<T> LinkedList<T> {
     }
 
     /// Returns the `LinkedList` converted into a `Vec`.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list = list![1, 3, 3, 7];
@@ -474,6 +495,7 @@ impl<T> LinkedList<T> {
 impl<T: PartialEq> LinkedList<T> {
     /// Searches through the `LinkedList` for a `Node` that contains the equivalent value of `finding`,
     /// returning its index if found.
+    /// 
     /// ## Example:
     /// ```rust
     /// let list: LinkedList<&str> = list!["Hey", "find", "THIS!"];

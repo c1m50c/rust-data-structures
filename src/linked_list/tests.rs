@@ -26,12 +26,13 @@ fn push_back() {
 }
 
 #[test]
-fn append_list() {
+fn append() {
     let mut list_one: LinkedList<&str> = list!["One", "Two", "Three"];
     let mut list_two: LinkedList<&str> = list!["Four", "Five", "Six"];
-    list_one.append_list(&mut list_two);
+    list_one.append(&mut list_two);
     assert_eq!(list_one, list!["One", "Two", "Three", "Four", "Five", "Six"]);
     assert_eq!(list_one.len(), 6);
+    assert!(list_two.is_empty());
 }
 
 #[test]
