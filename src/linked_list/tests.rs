@@ -37,23 +37,28 @@ fn append_list() {
 #[test]
 fn remove() {
     let mut list: LinkedList<&str> = list!["One", "Two", "Three"];
+
     list.remove_back();
     assert_eq!(list, list!["One", "Two"]);
+
     list.remove_front();
     assert_eq!(list, list!["Two"]);
+
+    list.push_back("<-");
+    list.push_front("->");
+    assert_eq!(list, list!["->", "Two", "<-"]);
 }
 
 #[test]
 fn pop() {
     let mut list: LinkedList<i32> = list![1, 2, 3, 4, 5];
     
-    let pop_front = list.pop_front();
-    assert_eq!(pop_front, Some(1));
+    assert_eq!(list.pop_front(), Some(1));
+    assert_eq!(list.pop_back(), Some(5));
 
-    let pop_back = list.pop_back();
-    assert_eq!(pop_back, Some(5));
-    
-    assert_eq!(list, list![2, 3, 4]);
+    list.push_back(0);
+    list.push_front(0);
+    assert_eq!(list, list![0, 2, 3, 4, 0]);
 }
 
 #[test]
@@ -94,19 +99,13 @@ fn search() {
 
 #[test]
 fn eq() {
-    let list1 = list![3, 2, 1];
-    let list2 = list![3, 2, 1];
-    assert_eq!(list1, list2);
+    assert_eq!(list![3, 2, 1], list![3, 2, 1]);
 }
 
 #[test]
 fn ne() {
-    let list1 = list![4, 0, 4];
-    let list2 = list![4, 0, 0];
-    assert_ne!(list1, list2);
-    
-    let list1 = list![4, 0, 4, 0];
-    assert_ne!(list1, list2);
+    assert_ne!(list![4, 0, 4], list![4, 0, 0]);
+    assert_ne!(list![4, 0, 4], list![4, 0, 4, 0]);
 }
 
 #[test]
