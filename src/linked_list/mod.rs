@@ -521,6 +521,10 @@ impl<T: fmt::Display> fmt::Display for LinkedList<T> {
             result.push_str(format!("{}, ", e).as_str());
         }
 
+        /*
+            SAFETY: Unwrapping will never result in a panic due to us checking the length
+            and returning an empty string representation of a list if it's equal to 0.
+        */
         return write!(f, "{}", result.strip_suffix(", ").unwrap().to_string() + "]");
     }
 }
