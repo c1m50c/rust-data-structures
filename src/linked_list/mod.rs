@@ -30,11 +30,11 @@ pub mod macros {
     /// assert_eq!(list, list![1, 2, 3]);
     /// ```
     macro_rules! list {
-        ($($e:expr), *) => {
+        ( $($element:expr), * ) => {
             {
                 #[allow(unused_mut)]
                 let mut list = $crate::linked_list::LinkedList::new();
-                $( list.push_back($e); )*
+                $( list.push_back($element); ) *
                 list
             }
         };
@@ -60,6 +60,20 @@ pub struct LinkedList<T> {
 }
 
 
+/// Struct for converting a `LinkedList` into an `Iterator`.
+/// The `Iterator` is based off continuously popping the List's head and returning its data vale.
+/// 
+/// ## Implementation:
+/// ```rust
+/// impl<T> Iterator for IntoIter<T> {
+///    type Item = T;
+///
+///    #[inline(always)]
+///    fn next(&mut self) -> Option<T> {
+///        return self.list.pop_front();
+///    }
+/// }
+/// ```
 #[derive(Clone)]
 pub struct IntoIter<T> {
     list: LinkedList<T>,
