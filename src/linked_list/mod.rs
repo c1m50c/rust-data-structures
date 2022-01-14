@@ -8,9 +8,9 @@ use std::boxed::Box;
 use std::vec::Vec;
 
 use core::mem::{swap as mem_swap, replace as mem_replace};
+use core::iter::{FusedIterator, FromIterator};
 use core::ptr::{NonNull, read as ptr_read};
 use core::ops::{Index, IndexMut};
-use core::iter::FusedIterator;
 use core::option::Option;
 use core::cmp::PartialEq;
 use core::str::FromStr;
@@ -33,7 +33,6 @@ pub mod macros {
     macro_rules! list {
         ( $($element:expr), * ) => {
             {
-                #[allow(unused_mut)]
                 let mut list = $crate::linked_list::LinkedList::new();
                 $( list.push_back($element); ) *
                 list
@@ -671,5 +670,14 @@ impl<T> IntoIterator for LinkedList<T> {
     #[inline(always)]
     fn into_iter(self) -> Self::IntoIter {
         return Self::IntoIter { list: self };
+    }
+}
+
+
+impl<T> FromIterator<T> for LinkedList<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut result = LinkedList::new();
+        for x in iter { result.push_back(x); }
+        return result;
     }
 }

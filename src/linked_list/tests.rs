@@ -210,3 +210,8 @@ fn iterator() {
 
     assert_eq!(sum, 22);
 }
+
+#[test]
+fn from_iterator() {
+    assert_eq!(vec![1, 2, 3].into_iter().collect::<LinkedList<i32>>(), list![1, 2, 3]);
+}
