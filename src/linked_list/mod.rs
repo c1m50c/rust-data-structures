@@ -493,14 +493,10 @@ impl<T: PartialEq> LinkedList<T> {
     /// ```
     #[inline]
     pub fn search(&self, finding: T) -> Option<usize> {
-        let mut current = self.head;
-        let mut index = 0;
-
-        while let Some(ptr) = current {
-            let node_ref = unsafe { ptr.as_ref() };
-            if node_ref.data == finding { return Some(index); }
-            current = node_ref.next;
-            index += 1;
+        for (i, e) in self.into_iter().enumerate() {
+            if e == finding {
+                return Some(i);
+            }
         }
 
         return None;
@@ -520,12 +516,9 @@ impl<T: fmt::Display> fmt::Display for LinkedList<T> {
         if self.length == 0 { return write!(f, "[]"); }
 
         let mut result = String::from("[");
-        let mut current = self.head;
 
-        while let Some(ptr) = current {
-            let ptr_ref = unsafe { ptr.as_ref() };
-            result.push_str(format!("{}, ", ptr_ref).as_str());
-            current = ptr_ref.next;
+        for e in self.into_iter() {
+            result.push_str(format!("{}, ", e).as_str());
         }
 
         return write!(f, "{}", result.strip_suffix(", ").unwrap().to_string() + "]");
