@@ -456,28 +456,16 @@ impl<T> LinkedList<T> {
         }
     }
 
-    /// Returns the `LinkedList` as a `Vec`.
+    /// Returns the `LinkedList` converted into a `Vec`.
     /// ## Example:
     /// ```rust
     /// let list = list![1, 3, 3, 7];
     /// assert_eq!(list.as_vector(), vec![1, 3, 3, 7]);
     /// ```
     #[inline]
-    pub fn as_vector(&self) -> Vec<T> {
+    pub fn as_vector(self) -> Vec<T> {
         let mut vector = Vec::with_capacity(self.length);
-        let mut current = self.head;
-
-        while let Some(ptr) = current {
-            let value;
-
-            unsafe {
-                value = ptr_read(&(*ptr.as_ref()).data);
-                current = ptr.as_ref().next;
-            }
-
-            vector.push(value);
-        }
-        
+        for e in self { vector.push(e); }
         return vector;
     }
 }
